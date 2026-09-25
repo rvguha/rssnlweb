@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QD RSS</title>
+<style>
+  :root { --fg: #1a1a1a; --muted: #666; --line: #ddd; --bg: #fff; --accent: #0b5fff; --tag: #eef3ff; }
+  @media (prefers-color-scheme: dark) {
+    :root { --fg: #eee; --muted: #999; --line: #333; --bg: #111; --accent: #6ea0ff; --tag: #1d2a44; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0 auto; max-width: 720px; padding: 32px 16px; font: 16px/1.5 system-ui, sans-serif; color: var(--fg); background: var(--bg); }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  form { display: grid; gap: 12px; }
+  label { display: grid; gap: 4px; font-size: 14px; color: var(--muted); }
+  input, select { font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; width: 100%; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  button { font: inherit; padding: 8px 14px; border-radius: 6px; border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; }
+  button.ghost { background: transparent; color: var(--accent); }
+  #url { margin-top: 24px; display: none; }
+  #url code { display: block; padding: 10px; border: 1px solid var(--line); border-radius: 6px; word-break: break-all; font-size: 14px; }
+  .actions { display: flex; gap: 8px; margin-top: 8px; align-items: center; }
+  .actions span { color: var(--muted); font-size: 14px; }
+  #preview { margin-top: 32px; }
+  #status { color: var(--muted); font-size: 14px; }
+  .item { padding: 14px 0; border-top: 1px solid var(--line); }
+  .item a { color: var(--fg); font-weight: 600; text-decoration: none; }
+  .item a:hover { text-decoration: underline; }
+  .meta { font-size: 13px; color: var(--muted); margin: 2px 0 6px; }
+  .tag { display: inline-block; padding: 0 6px; border-radius: 4px; background: var(--tag); color: var(--accent); font-size: 12px; margin-right: 6px; }
+  .why { font-size: 14px; }
+  .err { color: #c22; }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 20px; }
+  .tabs button { background: none; border: none; border-bottom: 2px solid transparent; border-radius: 0; color: var(--muted); padding: 8px 12px; margin-bottom: -1px; }
+  .tabs button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); }
+  .tabs small { color: var(--muted); font-size: 12px; margin-left: 4px; }
+</style>
+</head>
+<body>
+<h1>QD RSS</h1>
+<p class="sub">Type a query. Get an RSS feed of new items that match it.</p>
+
+<div class="tabs" id="tabs" role="tablist"></div>
+
+<form id="form">
+  <label>Query
+    <input id="q" name="q" placeholder="e.g. open-source database releases with benchmarks" required autofocus>
+  </label>
+  <div class="row">
+    <label>Items per fetch
+      <input id="limit" type="number" min="1" max="100" value="20">
+    </label>
+  </div>
+  <div><button type="submit">Create feed</button></div>
+</form>
+
+<div id="url">
+  <label>Feed URL</label>
+  <code id="urltext"></code>
+  <div class="actions">
+    <button type="button" class="ghost" id="copy">Copy</button>
+    <a id="open" target="_blank" rel="noopener">Open raw XML</a>
+    <span id="copied"></span>
+  </div>
+</div>
+
+<div id="preview">
+  <div id="status"></div>
+  <div id="items"></div>
+</div>
+
+<script>
+const form = document.getElementById('form');
+const urlBox = document.getElementById('url');
+const urlText = document.getElementById('urltext');
+const openLink = document.getElementById('open');
+const status = document.getElementById('status');
+const items = document.getElementById('items');
+const QD = 'https://qdrss.dev/ns';
+const tabs = document.getElementById('tabs');
+let collection = '';  // '' = every collection
+
+const LABELS = { ai: 'AI podcasts', history: 'History podcasts' };
+function label(name) { return LABELS[name] || name.replace(/[-_]/g, ' '); }
+
+async function loadTabs() {
+  let cols = {};
+  try { cols = await (await fetch('/collections')).json(); } catch (e) { return; }
+  const names = Object.keys(cols);
+  if (names.length < 2) { tabs.style.display = 'none'; return; }
+  const entries = [['', 'All', names.reduce((n, k) => n + cols[k].items, 0)], ...names.map(n => [n, label(n), cols[n].items])];
+  tabs.innerHTML = '';
+  for (const [name, text, items] of entries) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.role = 'tab'; b.dataset.collection = name;
+    b.append(text);
+    const s = document.createElement('small'); s.textContent = items.toLocaleString(); b.append(s);
+    b.addEventListener('click', () => { selectTab(name); if (urlBox.style.display === 'block') form.requestSubmit(); });
+    tabs.append(b);
+  }
+  selectTab(collection);
+}
+
+function selectTab(name) {
+  collection = name;
+  for (const b of tabs.querySelectorAll('button')) b.setAttribute('aria-selected', b.dataset.collection === name);
+}
+
+function feedUrl() {
+  const p = new URLSearchParams();
+  p.set('q', document.getElementById('q').value.trim());
+  if (collection) p.set('collection', collection);
+  const limit = parseInt(document.getElementById('limit').value, 10);
+  if (limit && limit !== 20) p.set('limit', String(limit));
+  return `${location.origin}/feed.xml?${p}`;
+}
+
+function text(node, name) {
+  const el = node.getElementsByTagName(name)[0];
+  return el ? el.textContent : '';
+}
+
+function render(xml) {
+  const doc = new DOMParser().parseFromString(xml, 'application/xml');
+  if (doc.getElementsByTagName('parsererror').length) throw new Error('feed is not valid XML');
+  const list = Array.from(doc.getElementsByTagName('item'));
+  items.innerHTML = '';
+  if (!list.length) { status.textContent = 'No matching items in the current window. Subscribe anyway; new matches appear as they arrive.'; return; }
+  status.textContent = `${list.length} item${list.length === 1 ? '' : 's'} match now`;
+  for (const node of list) {
+    const div = document.createElement('div');
+    div.className = 'item';
+    const a = document.createElement('a');
+    a.href = text(node, 'link'); a.textContent = text(node, 'title'); a.target = '_blank'; a.rel = 'noopener';
+    const meta = document.createElement('div'); meta.className = 'meta';
+    const tag = document.createElement('span'); tag.className = 'tag';
+    tag.textContent = node.getElementsByTagNameNS(QD, 'category')[0]?.textContent || '';
+    meta.append(tag, `${text(node, 'source')} · ${text(node, 'pubDate')}`);
+    const why = document.createElement('div'); why.className = 'why';
+    why.textContent = text(node, 'description').split('\n')[0].replace(/^\[\w+\]\s*/, '');
+    div.append(a, meta, why);
+    items.append(div);
+  }
+}
+
+async function preview(url) {
+  status.textContent = 'Evaluating…'; items.innerHTML = '';
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+    render(await res.text());
+  } catch (e) {
+    status.innerHTML = `<span class="err">${e.message}</span>`;
+  }
+}
+
+form.addEventListener('submit', (ev) => {
+  ev.preventDefault();
+  const url = feedUrl();
+  urlText.textContent = url; openLink.href = url; urlBox.style.display = 'block';
+  history.replaceState(null, '', `?${new URL(url).searchParams}`);
+  preview(url);
+});
+
+document.getElementById('copy').addEventListener('click', async () => {
+  await navigator.clipboard.writeText(urlText.textContent);
+  document.getElementById('copied').textContent = 'Copied';
+  setTimeout(() => document.getElementById('copied').textContent = '', 1500);
+});
+
+// A shared link like /?q=... rebuilds the same feed.
+const initial = new URLSearchParams(location.search);
+collection = initial.get('collection') || '';
+loadTabs();
+if (initial.get('q')) {
+  document.getElementById('q').value = initial.get('q');
+  if (initial.get('limit')) document.getElementById('limit').value = initial.get('limit');
+  form.requestSubmit();
+}
+</script>
+</body>
+</html>

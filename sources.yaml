@@ -1,0 +1,408 @@
+# Sources, grouped into collections. The section name is the collection: the UI
+# shows one tab per section and /feed.xml?collection=<name> restricts a feed to it.
+# Every URL was fetched and parsed on 2026-09-22. The ai list is podcasts.yaml;
+# the history list is Codex's history-podcasts-50.yaml.
+
+ai:
+- name: latent_space
+  url: https://api.substack.com/feed/podcast/1084089.rss
+  # Latent Space — swyx & Alessio Fanelli; weekly
+- name: twiml_ai
+  url: https://feeds.megaphone.fm/MLN2155636147
+  # The TWIML AI Podcast — Sam Charrington; weekly
+- name: practical_ai
+  url: https://feeds.transistor.fm/practical-ai-machine-learning-data-science-llm
+  # Practical AI — Daniel Whitenack & Chris Benson; weekly
+- name: lex_fridman
+  url: https://lexfridman.com/feed/podcast/
+  # Lex Fridman Podcast — Lex Fridman; biweekly
+- name: mlst
+  url: https://anchor.fm/s/1e4a0eac/podcast/rss
+  # Machine Learning Street Talk — Tim Scarfe; weekly
+- name: no_priors
+  url: https://feeds.megaphone.fm/nopriors
+  # No Priors — Sarah Guo & Elad Gil (Conviction); weekly
+- name: dwarkesh
+  url: https://apple.dwarkesh-podcast.workers.dev/feed.rss
+  # Dwarkesh Podcast — Dwarkesh Patel; biweekly
+- name: nvidia_ai
+  url: https://feeds.megaphone.fm/nvidiaaipodcast
+  # NVIDIA AI Podcast — NVIDIA / Noah Kravitz; biweekly
+- name: gradient_dissent
+  url: https://feeds.captivate.fm/gradient-dissent/
+  # Gradient Dissent — Lukas Biewald (Weights & Biases); monthly
+- name: hard_fork
+  url: https://feeds.simplecast.com/6HKOhNgS
+  # Hard Fork — NYT / Kevin Roose & Casey Newton; weekly
+- name: eye_on_ai
+  url: https://rss.libsyn.com/shows/123267/destinations/727317.xml
+  # Eye On A.I. — Craig S. Smith; weekly
+- name: cognitive_revolution
+  url: https://feeds.megaphone.fm/RINTP3108857801
+  # The Cognitive Revolution — Nathan Labenz (Turpentine); 2x/week
+- name: last_week_in_ai
+  url: https://rss.art19.com/last-week-in-ai
+  # Last Week in AI — Andrey Kurenkov & Jeremie Harris; weekly
+- name: ai_daily_brief
+  url: https://anchor.fm/s/f7cac464/podcast/rss
+  # The AI Daily Brief — Nathaniel Whittemore; daily
+- name: data_skeptic
+  url: https://rss.libsyn.com/shows/54799/destinations/201630.xml
+  # Data Skeptic — Kyle Polich; weekly
+- name: a16z_ai
+  url: https://feeds.simplecast.com/Hb_IuXOo
+  # AI + a16z — Andreessen Horowitz; biweekly
+- name: unsupervised_learning
+  url: https://feeds.simplecast.com/dOSE_bdP
+  # Unsupervised Learning — Redpoint / Jacob Effron; weekly
+- name: training_data
+  url: https://feeds.megaphone.fm/trainingdata
+  # Training Data — Sequoia Capital; weekly
+- name: deepmind_podcast
+  url: https://feeds.simplecast.com/JT6pbPkg
+  # Google DeepMind: The Podcast — Hannah Fry / DeepMind; seasonal
+- name: me_myself_and_ai
+  url: https://feeds.megaphone.fm/TPG7603691495
+  # Me, Myself, and AI — MIT SMR & BCG; biweekly
+- name: mixture_of_experts
+  url: https://feed.7f5afe5c.public.multi-containers.ibm.com/rss/1773841/403892542/1_x5yvmanw
+  # Mixture of Experts — IBM / Tim Hwang; weekly
+- name: super_data_science
+  url: https://feeds.megaphone.fm/SUPERDATASCIENCEPTYLTD9836501887
+  # Super Data Science — Jon Krohn; 2x/week
+- name: dataframed
+  url: https://feeds.captivate.fm/dataframed/
+  # DataFramed — DataCamp; weekly
+- name: interconnects
+  url: https://api.substack.com/feed/podcast/48206.rss
+  # Interconnects — Nathan Lambert (Ai2); weekly
+- name: thursdai
+  url: https://api.substack.com/feed/podcast/1801228.rss
+  # ThursdAI — Alex Volkov (W&B); weekly
+- name: ai_and_i
+  url: https://feeds.transistor.fm/how-do-you-use-chatgpt
+  # AI & I — Dan Shipper (Every); weekly
+- name: everyday_ai
+  url: https://rss.buzzsprout.com/2175779.rss
+  # Everyday AI — Jordan Wilson; daily
+- name: artificial_intelligence_show
+  url: https://feeds.megaphone.fm/marketingai
+  # The Artificial Intelligence Show — Marketing AI Institute; weekly
+- name: your_undivided_attention
+  url: https://feeds.simplecast.com/rZ0cYk12
+  # Your Undivided Attention — Center for Humane Technology; biweekly
+- name: data_exchange
+  url: https://rss.buzzsprout.com/682433.rss
+  # The Data Exchange — Ben Lorica; weekly
+- name: vanishing_gradients
+  url: https://api.substack.com/feed/podcast/2632531.rss
+  # Vanishing Gradients — Hugo Bowne-Anderson; biweekly
+- name: mlops_community
+  url: https://anchor.fm/s/174cb1b8/podcast/rss
+  # Agentic Conversations (MLOps Community) — Demetrios Brinkmann; weekly
+- name: fli_podcast
+  url: https://feeds.transistor.fm/future-of-life-institute-podcast-4e4d1fa5-a878-4cb2-91be-91c3ce266dfd
+  # Future of Life Institute Podcast — FLI / Gus Docker; biweekly
+- name: ai_applied
+  url: https://media.rss.com/ai-applied/feed.xml
+  # AI Applied — Conor Grennan & Jaeden Schafer; near-daily
+- name: ai_for_humans
+  url: https://rss.libsyn.com/shows/469701/destinations/3976203.xml
+  # AI For Humans — Kevin Pereira & Gavin Purcell; weekly
+- name: ai_in_business
+  url: https://rss.libsyn.com/shows/45920/destinations/151434.xml
+  # The AI in Business Podcast — Emerj / Daniel Faggella; 2x/week
+- name: ai_today
+  url: https://rss.buzzsprout.com/2502664.rss
+  # AI Today Podcast — Cognilytica; weekly
+- name: doom_debates
+  url: https://api.substack.com/feed/podcast/1777870.rss
+  # Doom Debates — Liron Shapira; weekly
+- name: brain_inspired
+  url: https://braininspired.co/feed/podcast/brain-inspired/
+  # Brain Inspired — Paul Middlebrooks; biweekly
+- name: how_i_ai
+  url: https://anchor.fm/s/1035b1568/podcast/rss
+  # How I AI — Claire Vo (Lenny's network); weekly
+- name: ai_inside
+  url: https://rss.introcast.io/1726128797/feeds.megaphone.fm/aiinsideshow
+  # AI Inside — Jason Howell & Jeff Jarvis; weekly
+- name: ai_policy_podcast
+  url: https://feeds.megaphone.fm/CSIS8973369418
+  # The AI Policy Podcast — CSIS Wadhwani AI Center; biweekly
+- name: machines_like_us
+  url: https://feeds.simplecast.com/FJSi7gLl
+  # Machines Like Us — Globe and Mail / Taylor Owen; biweekly
+- name: pioneers_of_ai
+  url: https://rss.art19.com/pioneers-of-ai
+  # Pioneers of AI — Rana el Kaliouby; weekly
+- name: possible
+  url: https://feeds.megaphone.fm/possible
+  # Possible — Reid Hoffman & Aria Finger; weekly
+- name: weaviate
+  url: https://anchor.fm/s/cffc3468/podcast/rss
+  # Weaviate Podcast — Connor Shorten; weekly
+- name: the_neuron
+  url: https://anchor.fm/s/f51d3fd0/podcast/rss
+  # The Neuron: AI Explained — The Neuron; weekly
+- name: mad_podcast
+  url: https://anchor.fm/s/f2ee4948/podcast/rss
+  # The MAD Podcast — Matt Turck (FirstMark); weekly
+- name: openai_podcast
+  url: https://feeds.acast.com/public/shows/68470ba8d911dedd6501609c
+  # OpenAI Podcast — OpenAI / Andrew Mayne; monthly
+- name: google_ai_release_notes
+  url: https://google-ai-release-notes.podigee.io/feed/mp3
+  # Google AI: Release Notes — Logan Kilpatrick; monthly
+- name: mystery_ai_hype_theater
+  url: https://rss.buzzsprout.com/2126417.rss
+  # Mystery AI Hype Theater 3000 — Emily M. Bender & Alex Hanna (DAIR); biweekly
+- name: scaling_laws
+  url: https://feeds.acast.com/public/shows/61e878a1419a9b0013b27134
+  # Scaling Laws — Lawfare & UT Austin Law; weekly
+- name: talkrl
+  url: https://feeds.transistor.fm/talkrl
+  # TalkRL — Robin Chauhan; monthly
+- name: tech_wont_save_us
+  url: https://rss.buzzsprout.com/1004689.rss
+  # Tech Won't Save Us — Paris Marx; weekly
+- name: leveraging_ai
+  url: https://rss.buzzsprout.com/2149574.rss
+  # Leveraging AI — Isar Meitis; 2x/week
+- name: ai_future_of_work
+  url: https://rss.buzzsprout.com/520474.rss
+  # AI and the Future of Work — Dan Turchin; weekly
+- name: computer_says_maybe
+  url: https://feeds.transistor.fm/computer-says-maybe
+  # Computer Says Maybe — Alix Dunn; weekly
+- name: the_good_robot
+  url: https://rss.buzzsprout.com/1786427.rss
+  # The Good Robot — Eleanor Drage & Kerry McInerney (Cambridge); weekly
+- name: in_ai_we_trust
+  url: https://feeds.transistor.fm/in-ai-we-trust
+  # In AI We Trust? — Miriam Vogel / EqualAI; monthly
+- name: ethical_machines
+  url: https://feeds.redcircle.com/b78540f3-d05f-4269-bdb3-e22c1aca55ed
+  # Ethical Machines — Reid Blackman; weekly
+- name: ai_chat
+  url: https://media.rss.com/ai-chat-podcast/feed.xml
+  # AI Chat — Jaeden Schafer; daily
+- name: ai_explored
+  url: https://rss.art19.com/ai-explored
+  # AI Explored — Michael Stelzner / Social Media Examiner; weekly
+- name: manifold
+  url: https://feeds.transistor.fm/manifold-one
+  # Manifold — Steve Hsu; weekly
+- name: turing_podcast
+  url: https://feed.podbean.com/turing/feed.xml
+  # The Turing Podcast — Alan Turing Institute; monthly
+- name: datatalks_club
+  url: https://anchor.fm/s/41286f68/podcast/rss
+  # DataTalks.Club — Alexey Grigorev; weekly
+- name: times_tech
+  url: https://feeds.acast.com/public/shows/8cf4cec7-5a0f-49c5-8ec9-36941b5c6b6e
+  # Times Tech — Sunday Times / Danny Fortson; weekly
+- name: ai_in_education
+  url: https://rss.libsyn.com/shows/216230/destinations/1569005.xml
+  # AI in Education Podcast — Dan Bowen & Ray Fleming; biweekly
+- name: raising_an_agent
+  url: https://rss.libsyn.com/shows/576500/destinations/4993060.xml
+  # Raising An Agent — Quinn Slack & Thorsten Ball (Sourcegraph); irregular
+- name: lesswrong_curated
+  url: https://rss.buzzsprout.com/2037297.rss
+  # LessWrong (Curated & Popular) — TYPE III AUDIO; daily
+- name: ai_and_healthcare
+  url: https://feed.podbean.com/mtrudnak/feed.xml
+  # AI and Healthcare — Mika Newton & Sanjay Juneja; weekly
+- name: black_box_guardian
+  url: https://www.theguardian.com/technology/series/blackbox/podcast.xml
+  # Black Box — The Guardian / Michael Safi; seasonal
+- name: life_with_machines
+  url: https://feeds.megaphone.fm/lifewithmachines
+  # Life with Machines — Baratunde Thurston; biweekly
+- name: ft_tech_tonic
+  url: https://feeds.acast.com/public/shows/125ef5a6-6c61-4024-b70e-3487a971a26c
+  # FT Tech Tonic — Financial Times; weekly
+- name: galaxy_brain
+  url: https://feeds.megaphone.fm/galaxybrain
+  # Galaxy Brain — The Atlantic / Charlie Warzel; weekly
+- name: the_last_invention
+  url: https://feeds.megaphone.fm/thelastinvention
+  # The Last Invention — Longview; weekly
+- name: genai_real_world
+  url: https://anchor.fm/s/10848eca8/podcast/rss
+  # Generative AI in the Real World — O'Reilly / Ben Lorica; biweekly
+- name: ai_frontiers_cais
+  url: https://feeds.type3.audio/ai-frontiers.rss
+  # AI Frontiers — Center for AI Safety; weekly
+- name: ai_safety_newsletter
+  url: https://feeds.type3.audio/cais--newsletter-ai-safety.rss
+  # AI Safety Newsletter — Center for AI Safety; biweekly
+- name: for_humanity
+  url: https://api.substack.com/feed/podcast/5979336/s/261561.rss
+  # For Humanity: An AI Risk Podcast — John Sherman; weekly
+- name: this_week_ai_regulations
+  url: https://feeds.transistor.fm/this-week-in-ai-regulations
+  # This Week in AI Regulations — Carver Agents; weekly
+- name: agents_of_dev
+  url: https://feed.podbean.com/agentsofdev/feed.xml
+  # Agents of Dev — The Futurum Group; weekly
+- name: deep_learning_polyai
+  url: https://rss.buzzsprout.com/2261452.rss
+  # Deep Learning with PolyAI — PolyAI; weekly
+- name: max_agency_langchain
+  url: https://anchor.fm/s/1112ba400/podcast/rss
+  # Max Agency — LangChain; irregular
+- name: pragmatic_engineer
+  url: https://api.substack.com/feed/podcast/458709.rss
+  # The Pragmatic Engineer — Gergely Orosz; weekly
+- name: nejm_ai_grand_rounds
+  url: https://ai-podcast.nejm.org/feed.xml
+  # NEJM AI Grand Rounds — NEJM Group; biweekly
+- name: daily_ai_show
+  url: https://anchor.fm/s/e71b9e54/podcast/rss
+  # The Daily AI Show — Daily AI Show team; daily
+- name: ai_news_daily_brief
+  url: https://feeds.transistor.fm/brief-ai
+  # AI News Daily — brief.news; daily
+- name: mit_tech_review_narrated
+  url: https://feeds.megaphone.fm/inmachineswetrust
+  # MIT Technology Review Narrated — MIT Technology Review; weekly
+- name: learning_bayesian_stats
+  url: https://api.riverside.fm/hosting/iA4hgdZC.rss/
+  # Learning Bayesian Statistics — Alexandre Andorra; biweekly
+- name: linear_digressions
+  url: https://feeds.feedburner.com/linear-digressions?format=xml
+  # Linear Digressions — Katie Malone; weekly
+- name: robot_report
+  url: https://feeds.soundcloud.com/users/soundcloud:users:830627836/sounds.rss
+  # The Robot Report Podcast — The Robot Report; weekly
+- name: autonocast
+  url: https://damon-lavrinc-zzza.squarespace.com/blog?format=rss
+  # Autonocast — Ed Niedermeyer & Kirsten Korosec; weekly
+- name: better_offline
+  url: https://www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/cf0c25ad-cf01-4da5-ae1c-b0fc015f790e/53ed270b-7147-4f70-81c2-b0fc015fe4ed/podcast.rss
+  # Better Offline — Ed Zitron / iHeart; 2x/week
+- name: artificial_human_bbc
+  url: https://podcasts.files.bbci.co.uk/m001wjf8.rss
+  # The Artificial Human — BBC Radio 4; seasonal
+- name: chatedu
+  url: https://rss.buzzsprout.com/2510245.rss
+  # ChatEDU: AI in Education — Matt Mervis & Elizabeth Radday; weekly
+- name: big_technology
+  url: https://feeds.megaphone.fm/LI3617121267
+  # Big Technology Podcast — Alex Kantrowitz; 2x/week
+- name: chinatalk
+  url: https://feeds.megaphone.fm/CHTAL4990341033
+  # ChinaTalk — Jordan Schneider; 2x/week
+- name: 80000_hours
+  url: https://feeds.transistor.fm/80000-hours-podcast
+  # 80,000 Hours Podcast — Rob Wiblin & Luisa Rodriguez; biweekly
+- name: tech_policy_press
+  url: https://feeds.captivate.fm/techpolicypress/
+  # The Tech Policy Press Podcast — Justin Hendrix; weekly
+- name: ted_ai_show
+  url: https://feeds.acast.com/public/shows/6758564a102e6d4448d19589
+  # The TED AI Show — TED / Bilawal Sidhu; weekly
+
+history:
+- name: the_rest_is_history
+  url: https://feeds.megaphone.fm/GLT4787413333
+- name: dan_carlin_s_hardcore_history
+  url: https://feeds.feedburner.com/dancarlin/history?format=xml
+- name: revolutions
+  url: https://rss.libsyn.com/shows/47475/destinations/159998.xml
+- name: the_history_of_rome
+  url: https://rss.libsyn.com/shows/17332/destinations/5627.xml
+- name: fall_of_civilizations_podcast
+  url: https://anchor.fm/s/101adcf44/podcast/rss
+- name: historyextra_podcast
+  url: https://feeds.megaphone.fm/GLT5697813216
+- name: dan_snow_s_history_hit
+  url: https://access.acast.com/rss/c939f8d1-c4bc-478e-8bb9-e5343f9a7ab5
+- name: the_ancients
+  url: https://access.acast.com/rss/f2925f7a-eb08-471a-9958-387cb5ee6353
+- name: gone_medieval
+  url: https://access.acast.com/rss/11c1773b-6d50-4dbb-b543-483046bdc241
+- name: not_just_the_tudors
+  url: https://access.acast.com/rss/b0ed85cc-f4ed-49e9-b860-0ba48481ae25
+- name: american_history_hit
+  url: https://access.acast.com/rss/62c7fb2a7acf3900129dffa7
+- name: betwixt_the_sheets_the_history_of_sex_scandal_society
+  url: https://access.acast.com/rss/6215faef4b795a5d1ffd3b62
+- name: empire_world_history
+  url: https://feeds.megaphone.fm/empirepodcast
+- name: you_re_dead_to_me
+  url: https://podcasts.files.bbci.co.uk/p07mdbhg.rss
+- name: in_our_time_history
+  url: https://podcasts.files.bbci.co.uk/p01dh5yg.rss
+- name: witness_history
+  url: https://podcasts.files.bbci.co.uk/p004t1hd.rss
+- name: throughline
+  url: https://feeds.npr.org/510333/podcast.xml
+- name: history_this_week
+  url: https://rss.amperwave.net/v2/feed/audacynetwork/history-this-week
+- name: history_daily
+  url: https://audioboom.com/channels/5162833.rss
+- name: short_history_of
+  url: https://feeds.megaphone.fm/NSR8236478683
+- name: tides_of_history
+  url: https://rss.art19.com/tides-of-history
+- name: american_history_tellers
+  url: https://rss.art19.com/american-history-tellers
+- name: american_scandal
+  url: https://rss.art19.com/american-scandal
+- name: stuff_you_missed_in_history_class
+  url: https://www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/cfb428ef-eafc-44d0-9d09-ae2701747e6f/fb626e1f-112c-4246-a40d-ae2701747e7d/podcast.rss
+- name: the_dollop_with_dave_anthony_and_gareth_reynolds
+  url: https://rss.art19.com/dollop
+- name: behind_the_bastards
+  url: https://www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/e5f91208-cc7e-4726-a312-ae280140ad11/d64f756d-6d5e-4fae-b24f-ae280140ad36/podcast.rss
+- name: the_history_of_byzantium
+  url: https://feeds.acast.com/public/shows/b53d3462-8bc8-46b5-875c-99d8b173ed52
+- name: the_british_history_podcast
+  url: http://feeds.feedburner.com/TheBritishHistoryPodcast
+- name: the_history_of_england
+  url: https://feeds.acast.com/public/shows/9c4dc3cd-147f-442d-b0d3-033f45c2648c
+- name: the_history_of_egypt_podcast
+  url: https://rss.pdrl.fm/61ed7e/feeds.megaphone.fm/ARML1519631706
+- name: the_history_of_china
+  url: https://rss.pdrl.fm/9b1303/feeds.megaphone.fm/ARML5229575461
+- name: history_of_japan
+  url: https://rss.libsyn.com/shows/43266/destinations/135800.xml
+- name: the_history_of_india_podcast
+  url: https://rss.libsyn.com/shows/72278/destinations/309639.xml
+- name: the_age_of_napoleon_podcast
+  url: https://feeds.megaphone.fm/ADL5280986787
+- name: the_french_history_podcast
+  url: https://rss.pdrl.fm/8986f6/feeds.megaphone.fm/frenchhistory
+- name: history_of_the_germans_from_the_middle_ages_to_reunification
+  url: https://feeds.transistor.fm/history-of-the-germans-from-the-middle-ages-to-reunification
+- name: the_history_of_english_podcast
+  url: https://historyofenglishpodcast.com/feed/podcast/
+- name: our_fake_history
+  url: https://rss.art19.com/our-fake-history
+- name: historical_blindness
+  url: https://rss.pdrl.fm/3f4740/feeds.megaphone.fm/ADL4668203624
+- name: the_history_of_the_twentieth_century
+  url: https://rss.libsyn.com/shows/71729/destinations/305807.xml
+- name: the_history_of_wwii_podcast
+  url: https://rss.pdrl.fm/eb4bb2/feeds.megaphone.fm/history-of-world-war-ii
+- name: history_of_the_great_war
+  url: https://rss.pdrl.fm/36fb8b/feeds.megaphone.fm/ADV4493130704
+- name: the_ww2_podcast
+  url: https://rss.libsyn.com/shows/65366/destinations/260446.xml
+- name: the_bowery_boys_new_york_city_history
+  url: https://feeds.simplecast.com/mkeh0Frc
+- name: ben_franklin_s_world
+  url: https://feeds.captivate.fm/ben-franklins-world/
+- name: backstory
+  url: https://audioboom.com/channels/4987698.rss
+- name: you_must_remember_this
+  url: https://rss.amperwave.net/v2/feed/audacynetwork/030f6dccce3e28ccc383008872ed4c22
+- name: a_history_of_rock_music_in_500_songs
+  url: https://500songs.com/feed/podcast/a-history-of-rock-music-in-500-songs/
+- name: history_of_philosophy_without_any_gaps
+  url: https://feed.podbean.com/hopwag/feed.xml
+- name: the_latin_american_history_podcast
+  url: https://feeds.redcircle.com/db4d04b0-02b5-4691-81a7-b583a8052e89
