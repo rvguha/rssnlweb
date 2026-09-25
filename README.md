@@ -15,15 +15,59 @@ is the whole definition of a feed.
 python -m venv .venv
 . .venv/bin/activate
 pip install -e '.[dev]'
-cp .env.example .env            # OPENROUTER_API_KEY for real embeddings and ranking
+cp .env.example .env            # then add your key, see below
 qdrss
 ```
 
 Open <http://127.0.0.1:8000/>: type a query, get the feed URL and a preview of what it
-returns now. The URL encodes the query; there is nothing to save on the server. `/health` shows item
-count, index age, and per-source fetch status. Without `OPENROUTER_API_KEY` the
-server uses hash embeddings and a keyword ranker: enough to see the plumbing work,
-not enough to judge relevance.
+returns now. The URL encodes the query; there is nothing to save on the server.
+`/health` shows item count, index age, and per-source fetch status.
+
+## Keys and models
+
+All model calls go through [OpenRouter](https://openrouter.ai), one key for both
+embeddings and ranking. Put it in `.env` (git-ignored) or in the environment:
+
+```bash
+OPENROUTER_API_KEY=sk-or-...            # https://openrouter.ai/settings/keys
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+OPENROUTER_RANKING_MODEL=openai/gpt-oss-20b
+OPENROUTER_EMBEDDING_MODEL=openai/text-embedding-3-small
+OPENROUTER_RANKING_PROVIDER_SORT=throughput
+```
+
+Without a key the server falls back to hash embeddings and a keyword ranker: the
+plumbing works, the relevance doesn't. Don't judge results in that mode.
+
+**Ranking model.** The ranker classifies each candidate strong / relevant / exclude
+and returns JSON. Any OpenRouter chat model that honours `response_format:
+json_object` works. Open-weight options, cheapest first:
+
+| Model | Notes |
+|---|---|
+| `openai/gpt-oss-20b` | default; measured ~1 s per batch of 5 with `provider.sort=throughput` (10 s without) |
+| `openai/gpt-oss-120b` | same family, better judgement, ~3x the price |
+| `google/gemma-3-27b-it` | fast, no reasoning tokens |
+| `meta-llama/llama-3.3-70b-instruct` | solid at structured output |
+| `mistralai/mistral-small-3.2-24b-instruct` | cheap, fast |
+| `deepseek/deepseek-v3.2` | strongest of the open models here; slower |
+
+Only `gpt-oss-20b` has been measured on this workload. Two things matter for reasoning
+models like gpt-oss: the request sets `reasoning.effort=low` and a generous
+`max_tokens`, because a tight cap makes them spend the budget thinking and return
+empty content (which this server reports as a 503, not an empty feed).
+
+**Embedding model.** `openai/text-embedding-3-small` (1536 dims) is what the shipped
+corpus was embedded with. Embeddings are cached per item per model, so changing
+`OPENROUTER_EMBEDDING_MODEL` re-embeds every item on the next refresh; at 57k items
+that is about $0.15 and 15 minutes with text-embedding-3-small, and the old vectors
+stay in the store keyed by their model name. Any model OpenRouter's `/embeddings`
+endpoint serves can be named here; open-weight embedding models come and go on
+OpenRouter, so check their catalogue before switching.
+
+**Cost.** Per feed fetch: one embedding call (cached per query) and
+`candidate_count / batch_size` ranking calls (8 by default), well under a cent with
+gpt-oss-20b. The corpus embedding is a one-time cost per model.
 
 ## How a fetch works
 
