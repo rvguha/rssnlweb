@@ -65,9 +65,11 @@ stay in the store keyed by their model name. Any model OpenRouter's `/embeddings
 endpoint serves can be named here; open-weight embedding models come and go on
 OpenRouter, so check their catalogue before switching.
 
-**Cost.** Per feed fetch: one embedding call (cached per query) and
-`candidate_count / batch_size` ranking calls (8 by default), well under a cent with
-gpt-oss-20b. The corpus embedding is a one-time cost per model.
+**Cost.** A feed fetch is one embedding call (cached per query) plus
+`candidate_count / batch_size` ranking calls (8 by default). With gpt-oss-20b that is
+about 0.2 cents per fetch, so **1,000 fetches cost about $2**. Feed readers poll the
+same URL for months, so per-fetch cost is what scales, not per-query. The corpus
+embedding is a one-time cost per model.
 
 ## How a fetch works
 
