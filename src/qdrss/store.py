@@ -23,7 +23,8 @@ CREATE TABLE IF NOT EXISTS items (
     content TEXT NOT NULL,
     published_at TEXT,
     published_raw TEXT NOT NULL,
-    ingested_at TEXT NOT NULL
+    ingested_at TEXT NOT NULL,
+    collection TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX IF NOT EXISTS items_ingested ON items (ingested_at);
 CREATE TABLE IF NOT EXISTS sources (
@@ -51,13 +52,20 @@ class Store:
             self.path.parent.mkdir(parents=True, exist_ok=True)
         self.db = sqlite3.connect(str(self.path), check_same_thread=False)
         self.db.executescript(_SCHEMA)
+        # Databases created before the collection column existed.
+        cols = {row[1] for row in self.db.execute("PRAGMA table_info(items)")}
+        if "collection" not in cols:
+            self.db.execute("ALTER TABLE items ADD COLUMN collection TEXT NOT NULL DEFAULT ''")
 
-    def close(self) -> None:
+    async def setup(self) -> None:
+        return None
+
+    async def close(self) -> None:
         self.db.close()
 
     # --- items ---------------------------------------------------------------
 
-    def insert_missing(self, items: list[Item]) -> int:
+    async def insert_missing(self, items: list[Item]) -> int:
         """Insert items whose id is new. Existing rows are never touched."""
         rows = [
             (
@@ -70,12 +78,13 @@ class Store:
                 _iso(item.published_at),
                 item.published_raw,
                 _iso(item.ingested_at),
+                item.collection,
             )
             for item in items
         ]
         with self.db:
             cursor = self.db.executemany(
-                "INSERT OR IGNORE INTO items VALUES (?,?,?,?,?,?,?,?,?)", rows
+                "INSERT OR IGNORE INTO items VALUES (?,?,?,?,?,?,?,?,?,?)", rows
             )
         return cursor.rowcount
 
@@ -83,7 +92,7 @@ class Store:
         rows = self.db.execute("SELECT * FROM items ORDER BY ingested_at, id").fetchall()
         return [_row_item(row) for row in rows]
 
-    def count(self) -> int:
+    async def count(self) -> int:
         return self.db.execute("SELECT COUNT(*) FROM items").fetchone()[0]
 
     def counts_by_source(self) -> dict[str, int]:
@@ -92,7 +101,7 @@ class Store:
 
     # --- sources -------------------------------------------------------------
 
-    def source_state(self, name: str) -> dict[str, str | None]:
+    async def source_state(self, name: str) -> dict[str, str | None]:
         row = self.db.execute(
             "SELECT url, etag, last_modified, sha256, last_fetch, last_error "
             "FROM sources WHERE name = ?",
@@ -103,7 +112,7 @@ class Store:
         keys = ("url", "etag", "last_modified", "sha256", "last_fetch", "last_error")
         return dict(zip(keys, row, strict=True))
 
-    def remember_source(
+    async def remember_source(
         self,
         name: str,
         url: str,
@@ -113,7 +122,7 @@ class Store:
         sha256: str | None = None,
         error: str | None = None,
     ) -> None:
-        previous = self.source_state(name)
+        previous = await self.source_state(name)
         with self.db:
             self.db.execute(
                 "INSERT OR REPLACE INTO sources VALUES (?,?,?,?,?,?,?)",
@@ -128,7 +137,7 @@ class Store:
                 ),
             )
 
-    def all_sources(self) -> list[dict[str, str | None]]:
+    async def all_sources(self) -> list[dict[str, str | None]]:
         rows = self.db.execute(
             "SELECT name, url, last_fetch, last_error FROM sources ORDER BY name"
         ).fetchall()
@@ -177,4 +186,5 @@ def _row_item(row: tuple) -> Item:
         published_at=datetime.fromisoformat(row[6]) if row[6] else None,
         published_raw=row[7],
         ingested_at=datetime.fromisoformat(row[8]),
+        collection=row[9] if len(row) > 9 else "",
     )

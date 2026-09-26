@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import logging
+import time
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -14,30 +15,55 @@ from starlette.responses import FileResponse, JSONResponse, PlainTextResponse, R
 from starlette.routing import Route
 
 from .config import Config, load_config
-from .feed import FeedRequest, evaluate, render_rss
+from .feed import FeedRequest, Retriever, evaluate, render_rss
 from .feeds import parse_date
 from .index import Index, build_index
 from .ingest import load_sources, refresh
 from .providers import Embeddings, HashEmbeddings, KeywordRanker, OpenRouter, Ranker
 from .rank import RankingError
-from .store import Store
 
 logger = logging.getLogger("qdrss")
 STATIC = Path(__file__).parent / "static"
 
 
 class Services:
+    """Two storage modes behind one interface.
+
+    Cosmos (COSMOS_ENDPOINT set): items and vectors live in Cosmos DB, retrieval
+    is a Cosmos vector query, and the process holds nothing. SQLite (default):
+    items live in a local file and an in-memory matrix is rebuilt after every
+    refresh. Tests and offline runs use SQLite.
+    """
+
     def __init__(self, config: Config, embedder: Embeddings, ranker: Ranker):
         self.config = config
         self.embedder = embedder
         self.ranker = ranker
-        self.store = Store(config.db_path)
         self.sources = load_sources(config.sources_path)
         self.collections = {s.name: s.collection for s in self.sources}
+        self.cosmos = bool(config.cosmos_endpoint)
+        if self.cosmos:
+            from .cosmos import CosmosStore
+
+            self.store = CosmosStore(config.cosmos_endpoint, config.cosmos_key, config.cosmos_database)
+        else:
+            from .store import Store
+
+            self.store = Store(config.db_path)
         self.index: Index = Index([], np.zeros((0, 1), dtype=np.float32))
-        self.index_built_at: datetime | None = None
+        self.ready_at: datetime | None = None
         self.last_refresh: dict = {}
         self._task: asyncio.Task | None = None
+        self._counts_cache: tuple[float, dict] | None = None
+
+    @property
+    def retriever(self) -> Retriever:
+        return self.store if self.cosmos else self.index  # type: ignore[return-value]
+
+    async def setup(self) -> None:
+        await self.store.setup()
+        if self.cosmos:
+            self.ready_at = datetime.now(UTC)
 
     async def refresh_once(self) -> None:
         outcomes = await refresh(
@@ -48,13 +74,47 @@ class Services:
             "new_items": sum(o.new_items for o in outcomes),
             "errors": {o.source.name: o.error for o in outcomes if o.error},
         }
-        # Rebuild even when nothing changed: a failed previous build gets retried
-        # for free, and the cost is bounded by the embedding cache.
         try:
-            self.index = await build_index(self.store, self.embedder, self.collections)
-            self.index_built_at = datetime.now(UTC)
+            if self.cosmos:
+                await self.embed_missing()
+            else:
+                # Rebuild even when nothing changed: a failed previous build gets
+                # retried for free, and the cost is bounded by the embedding cache.
+                self.index = await build_index(self.store, self.embedder, self.collections)
+            self.ready_at = datetime.now(UTC)
         except Exception:
-            logger.exception("index rebuild failed; serving the previous index")
+            logger.exception("indexing failed; serving the previous state")
+        self._counts_cache = None
+
+    async def embed_missing(self) -> int:
+        """Cosmos mode: embed items that arrived without a vector, in batches."""
+        total = 0
+        while True:
+            items = await self.store.items_without_embedding(100)
+            if not items:
+                return total
+            vectors = await self.embedder.embed([item.text[:8000] for item in items])
+            await self.store.save_embeddings(
+                self.embedder.model, {item.id: vectors[i] for i, item in enumerate(items)}
+            )
+            total += len(items)
+            logger.info("embedded %d items (%d so far)", len(items), total)
+
+    async def collection_counts(self) -> dict[str, dict]:
+        if self._counts_cache and time.monotonic() - self._counts_cache[0] < 60:
+            return self._counts_cache[1]
+        out: dict[str, dict] = {}
+        for source in self.sources:
+            out.setdefault(source.collection, {"sources": 0, "items": 0})["sources"] += 1
+        if self.cosmos:
+            for name, n in (await self.store.counts_by_collection()).items():
+                out.setdefault(name, {"sources": 0, "items": 0})["items"] = n
+        else:
+            counts = self.store.counts_by_source()
+            for source in self.sources:
+                out[source.collection]["items"] += counts.get(source.name, 0)
+        self._counts_cache = (time.monotonic(), out)
+        return out
 
     async def _loop(self) -> None:
         while True:
@@ -65,14 +125,15 @@ class Services:
             await asyncio.sleep(self.config.refresh_minutes * 60)
 
     def start(self) -> None:
-        self._task = asyncio.create_task(self._loop())
+        if self.config.ingest_in_app or not self.cosmos:
+            self._task = asyncio.create_task(self._loop())
 
     async def stop(self) -> None:
         if self._task:
             self._task.cancel()
             with contextlib.suppress(asyncio.CancelledError):
                 await self._task
-        self.store.close()
+        await self.store.close()
 
 
 def build_services(config: Config | None = None) -> Services:
@@ -112,14 +173,14 @@ def create_app(services: Services) -> Starlette:
         collection = params.get("collection", "").strip() or None
         if collection and collection not in services.collections.values():
             return PlainTextResponse(f"unknown collection {collection!r}", status_code=400)
-        if services.index_built_at is None:
+        if services.ready_at is None:
             return PlainTextResponse("index not built yet", status_code=503)
 
         feed_request = FeedRequest(q, since, limit, threshold, collection)
         try:
             matches = await evaluate(
                 feed_request,
-                services.index,
+                services.retriever,
                 services.embedder,
                 services.ranker,
                 candidate_count=services.config.candidate_count,
@@ -137,28 +198,22 @@ def create_app(services: Services) -> Starlette:
         return FileResponse(STATIC / "index.html")
 
     async def collections(_: Request) -> Response:
-        counts = services.store.counts_by_source()
-        out: dict[str, dict] = {}
-        for source in services.sources:
-            entry = out.setdefault(source.collection, {"sources": 0, "items": 0})
-            entry["sources"] += 1
-            entry["items"] += counts.get(source.name, 0)
-        return JSONResponse(out)
+        return JSONResponse(await services.collection_counts())
 
     async def health(_: Request) -> Response:
         return JSONResponse(
             {
-                "items": services.store.count(),
-                "index_built_at": (
-                    services.index_built_at.isoformat() if services.index_built_at else None
-                ),
+                "store": "cosmos" if services.cosmos else "sqlite",
+                "items": await services.store.count(),
+                "index_built_at": services.ready_at.isoformat() if services.ready_at else None,
                 "last_refresh": services.last_refresh,
-                "sources": services.store.all_sources(),
+                "sources": await services.store.all_sources(),
             }
         )
 
     @contextlib.asynccontextmanager
     async def lifespan(_: Starlette):
+        await services.setup()
         services.start()
         try:
             yield
@@ -180,3 +235,26 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
     services = build_services()
     uvicorn.run(create_app(services), host=services.config.host, port=services.config.port)
+
+
+def ingest_main() -> None:
+    """Fetch every source once, store new items, embed them, exit.
+
+    Runs anywhere with the same .env as the web app; with Cosmos this is how the
+    corpus is updated independently of serving.
+    """
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
+
+    async def run() -> None:
+        services = build_services()
+        await services.setup()
+        try:
+            await services.refresh_once()
+            r = services.last_refresh
+            print(f"new items: {r['new_items']}; errors: {len(r['errors'])}")
+            for name, err in r["errors"].items():
+                print(f"  {name}: {err}")
+        finally:
+            await services.store.close()
+
+    asyncio.run(run())

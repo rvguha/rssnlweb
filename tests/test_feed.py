@@ -17,7 +17,7 @@ OPTS = {"candidate_count": 3, "batch_size": 2, "window_days": 7}
 
 async def populated(store: Store):
     old = NOW - timedelta(days=30)
-    store.insert_missing(
+    await store.insert_missing(
         [
             make_item(f"old{i}", "rust compiler rust compiler", "rust", ingested=old)
             for i in range(5)
@@ -117,7 +117,7 @@ async def test_render_rss_escapes_and_is_stable():
 
 
 async def test_collection_mask(store: Store):
-    store.insert_missing(
+    await store.insert_missing(
         [
             make_item("a1", "rust news", "rust", ingested=NOW, source="ai_show"),
             make_item("h1", "rust in history", "rust", ingested=NOW, source="hist_show"),

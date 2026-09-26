@@ -10,16 +10,16 @@ from qdrss.store import Store
 from .conftest import NOW, RSS, make_item
 
 
-def test_insert_if_absent_keeps_first_version(store: Store):
-    assert store.insert_missing([make_item("1", "v1")]) == 1
-    assert store.insert_missing([make_item("1", "v2"), make_item("2", "n")]) == 1
+async def test_insert_if_absent_keeps_first_version(store: Store):
+    assert await store.insert_missing([make_item("1", "v1")]) == 1
+    assert await store.insert_missing([make_item("1", "v2"), make_item("2", "n")]) == 1
     titles = {i.id: i.title for i in store.all_items()}
     assert titles == {"s:1": "v1", "s:2": "n"}
 
 
-def test_items_survive_reopen(tmp_path):
+async def test_items_survive_reopen(tmp_path):
     path = tmp_path / "db.sqlite"
-    Store(path).insert_missing([make_item("1", "t")])
+    await Store(path).insert_missing([make_item("1", "t")])
     assert [i.id for i in Store(path).all_items()] == ["s:1"]
 
 
@@ -58,7 +58,7 @@ async def test_conditional_get_then_304(store: Store):
     second = await run(server, store)
     assert server.requests[1].headers["If-None-Match"] == '"v1"'
     assert second.new_items == 0 and not second.changed and second.error is None
-    assert store.count() == 3
+    assert await store.count() == 3
 
 
 async def test_identical_body_200_is_unchanged(store: Store):
@@ -73,18 +73,18 @@ async def test_new_item_appended_and_rolled_off_items_kept(store: Store):
     await run(server, store)
     out = await run(server, store)
     assert out.new_items == 1
-    assert store.count() == 4  # a-1 rolled off upstream but stays
+    assert await store.count() == 4  # a-1 rolled off upstream but stays
 
 
 async def test_failure_keeps_validators_and_items(store: Store):
     server = Server((200, {"ETag": '"v1"'}, RSS), (500, {}, b""), (304, {}, b""))
     await run(server, store)
     failed = await run(server, store)
-    assert failed.error == "HTTP 500" and store.count() == 3
-    assert store.source_state("a")["etag"] == '"v1"'
+    assert failed.error == "HTTP 500" and await store.count() == 3
+    assert (await store.source_state("a"))["etag"] == '"v1"'
     await run(server, store)
     assert server.requests[2].headers["If-None-Match"] == '"v1"'
-    assert store.source_state("a")["last_error"] is None
+    assert (await store.source_state("a"))["last_error"] is None
 
 
 async def test_malformed_body_does_not_update_validators(store: Store):
@@ -92,7 +92,7 @@ async def test_malformed_body_does_not_update_validators(store: Store):
     bad = await run(server, store)
     assert bad.error and "not XML" in bad.error or "neither" in bad.error
     assert "If-None-Match" not in (await run(server, store), server.requests[1])[1].headers
-    assert store.count() == 3
+    assert await store.count() == 3
 
 
 async def test_one_failing_source_does_not_block_another(store: Store):
@@ -107,11 +107,11 @@ async def test_one_failing_source_does_not_block_another(store: Store):
     assert outcomes[0].error and outcomes[1].new_items == 3
 
 
-def test_ingested_at_is_first_seen(store: Store):
+async def test_ingested_at_is_first_seen(store: Store):
     early = parse_feed(RSS, "a", NOW - timedelta(days=3))
     late = parse_feed(RSS, "a", NOW)
-    store.insert_missing(early)
-    store.insert_missing(late)
+    await store.insert_missing(early)
+    await store.insert_missing(late)
     assert all(i.ingested_at == NOW - timedelta(days=3) for i in store.all_items())
 
 

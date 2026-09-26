@@ -30,20 +30,24 @@ def make_services(tmp_path) -> Services:
         ranking_model="",
         embedding_model="",
         provider_sort="",
+        cosmos_endpoint="",
+        cosmos_key="",
+        cosmos_database="qdrss",
+        ingest_in_app=True,
     )
     return Services(config, HashEmbeddings(), KeywordRanker())
 
 
 async def test_feed_endpoint(tmp_path):
     services = make_services(tmp_path)
-    services.store.insert_missing(
+    await services.store.insert_missing(
         [
             make_item("1", "rust release", "rust", ingested=NOW - timedelta(days=1)),
             make_item("2", "old rust", "rust", ingested=NOW - timedelta(days=30)),
         ]
     )
     services.index = await build_index(services.store, services.embedder, services.collections)
-    services.index_built_at = NOW
+    services.ready_at = NOW
     app = create_app(services)
     services.start = lambda: None  # no refresh loop in tests
 
@@ -91,9 +95,9 @@ async def test_503_before_index_and_on_ranker_failure(tmp_path):
         async def structured(self, instruction, payload):
             raise RuntimeError("provider down")
 
-    services.store.insert_missing([make_item("1", "rust", "rust", ingested=NOW)])
+    await services.store.insert_missing([make_item("1", "rust", "rust", ingested=NOW)])
     services.index = await build_index(services.store, services.embedder, services.collections)
-    services.index_built_at = NOW
+    services.ready_at = NOW
     services.ranker = Broken()
     with TestClient(app) as client:
         r = client.get("/feed.xml?q=rust&since=2020-01-01T00:00:00Z")

@@ -22,6 +22,8 @@ import yaml
 from .feeds import FeedError, next_page, parse_feed
 from .store import Store
 
+StoreLike = Store  # any object with the async Store interface (see cosmos.CosmosStore)
+
 logger = logging.getLogger(__name__)
 TIMEOUT = httpx.Timeout(30.0)
 MAX_BYTES = 20 * 1024 * 1024
@@ -87,7 +89,7 @@ async def refresh(
 async def _fetch_one(
     source: Source, store: Store, client: httpx.AsyncClient, limit: asyncio.Semaphore
 ) -> Outcome:
-    previous = store.source_state(source.name)
+    previous = await store.source_state(source.name)
     headers: dict[str, str] = {}
     if previous.get("etag"):
         headers["If-None-Match"] = previous["etag"]  # type: ignore[index]
@@ -98,38 +100,38 @@ async def _fetch_one(
         try:
             response = await client.get(source.url, headers=headers)
         except httpx.HTTPError as exc:
-            return _failed(store, source, f"{type(exc).__name__}: {exc}")
+            return await _failed(store, source, f"{type(exc).__name__}: {exc}")
 
     if response.status_code == 304:
-        store.remember_source(source.name, source.url, **_validators(response, previous))
+        await store.remember_source(source.name, source.url, **_validators(response, previous))
         return Outcome(source)
     if response.status_code >= 400:
-        return _failed(store, source, f"HTTP {response.status_code}")
+        return await _failed(store, source, f"HTTP {response.status_code}")
     body = response.content
     if len(body) > MAX_BYTES:
-        return _failed(store, source, f"{len(body)} bytes exceeds the limit")
+        return await _failed(store, source, f"{len(body)} bytes exceeds the limit")
     if not body.strip():
-        return _failed(store, source, "empty response")
+        return await _failed(store, source, "empty response")
 
     digest = hashlib.sha256(body).hexdigest()
     validators = _validators(response, previous, digest)
     if previous.get("sha256") == digest:
-        store.remember_source(source.name, source.url, **validators)
+        await store.remember_source(source.name, source.url, **validators)
         return Outcome(source)
 
     # Parse before touching the store: a malformed body must not update validators,
     # or the next fetch would 304 and we would never see a corrected feed.
     try:
-        items = parse_feed(body, source.name, datetime.now(UTC))
+        items = _tag(parse_feed(body, source.name, datetime.now(UTC)), source)
     except FeedError as exc:
-        return _failed(store, source, str(exc))
+        return await _failed(store, source, str(exc))
 
-    inserted = store.insert_missing(items)
+    inserted = await store.insert_missing(items)
     # First sight of a source: walk its RFC 5005 archive pages so we hold the
     # whole history. Later fetches only need page one, where new items appear.
     if not previous:
         inserted += await _archive(source, body, store, client, limit)
-    store.remember_source(source.name, source.url, **validators)
+    await store.remember_source(source.name, source.url, **validators)
     logger.info("%s: %d items, %d new", source.name, len(items), inserted)
     return Outcome(source, new_items=inserted, changed=True)
 
@@ -155,21 +157,27 @@ async def _archive(
         if response.status_code != 200 or not response.content.strip():
             break
         try:
-            items = parse_feed(response.content, source.name, datetime.now(UTC))
+            items = _tag(parse_feed(response.content, source.name, datetime.now(UTC)), source)
         except FeedError as exc:
             logger.warning("%s: archive page %s: %s", source.name, url, exc)
             break
-        inserted += store.insert_missing(items)
+        inserted += await store.insert_missing(items)
         url = next_page(response.content)
     if seen:
         logger.info("%s: %d archive pages, %d items", source.name, len(seen), inserted)
     return inserted
 
 
-def _failed(store: Store, source: Source, error: str) -> Outcome:
+async def _failed(store: Store, source: Source, error: str) -> Outcome:
     logger.warning("%s: %s", source.name, error)
-    store.remember_source(source.name, source.url, error=error)
+    await store.remember_source(source.name, source.url, error=error)
     return Outcome(source, error=error)
+
+
+def _tag(items: list, source: Source) -> list:
+    from dataclasses import replace
+
+    return [replace(item, collection=source.collection) for item in items]
 
 
 def _validators(

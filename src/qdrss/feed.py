@@ -6,14 +6,20 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from email.utils import format_datetime
+from typing import Protocol
 from urllib.parse import urlencode
 
 import numpy as np
 
-from .index import Index
-from .models import Match
+from .models import Candidate, Match
 from .providers import Embeddings, Ranker
 from .rank import classify
+
+
+class Retriever(Protocol):
+    async def search(
+        self, vector: np.ndarray, since: datetime | None, collection: str | None, limit: int
+    ) -> list[Candidate]: ...
 
 NS = "https://qdrss.dev/ns"
 
@@ -45,7 +51,7 @@ class FeedRequest:
 
 async def evaluate(
     request: FeedRequest,
-    index: Index,
+    retriever: Retriever,
     embedder: Embeddings,
     ranker: Ranker,
     *,
@@ -54,9 +60,8 @@ async def evaluate(
     window_days: int,
 ) -> list[Match]:
     since = request.since or datetime.now(UTC) - timedelta(days=window_days)
-    mask = index.eligible(since, request.collection)
     vector = await _query_vector(embedder, request.q)
-    candidates = index.search(vector, mask, candidate_count)
+    candidates = await retriever.search(vector, since, request.collection, candidate_count)
     matches = await classify(request.q, candidates, ranker, batch_size)
     if request.threshold == "strong":
         matches = [m for m in matches if m.category == "strong"]

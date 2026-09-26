@@ -25,6 +25,10 @@ class Config:
     ranking_model: str
     embedding_model: str
     provider_sort: str
+    cosmos_endpoint: str
+    cosmos_key: str
+    cosmos_database: str
+    ingest_in_app: bool
 
     @property
     def db_path(self) -> Path:
@@ -51,4 +55,8 @@ def load_config() -> Config:
         ranking_model=env.get("OPENROUTER_RANKING_MODEL", "openai/gpt-oss-20b"),
         embedding_model=env.get("OPENROUTER_EMBEDDING_MODEL", "openai/text-embedding-3-small"),
         provider_sort=env.get("OPENROUTER_RANKING_PROVIDER_SORT", "throughput"),
+        cosmos_endpoint=env.get("COSMOS_ENDPOINT", ""),
+        cosmos_key=env.get("COSMOS_KEY", ""),
+        cosmos_database=env.get("COSMOS_DATABASE", "qdrss"),
+        ingest_in_app=env.get("QDRSS_INGEST_IN_APP", "true").lower() in ("1", "true", "yes"),
     )

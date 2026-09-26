@@ -17,6 +17,7 @@ class Item:
     published_at: datetime | None  # source publication time, UTC
     published_raw: str  # as it appeared in the feed
     ingested_at: datetime  # first time we stored it, UTC; never changes
+    collection: str = ""  # manifest section of the source; set at ingest
 
     @property
     def text(self) -> str:

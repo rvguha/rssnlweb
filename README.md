@@ -104,6 +104,22 @@ cached. The corpus embedding is a one-time cost per model.
 - `pubDate` is the source publication time. `<qd:category>` and `<qd:source>` carry
   the verdict and the source name.
 
+## Storage: Cosmos DB or SQLite
+
+Two modes behind one interface, chosen by whether `COSMOS_ENDPOINT` is set.
+
+- **Cosmos DB for NoSQL** (production): one `items` container partitioned by
+  collection holds each episode with its embedding; the feed's nearest-neighbour
+  query runs in Cosmos with the date and collection filters, over a DiskANN index.
+  The web process holds nothing. The free tier (1000 RU/s, 25 GB) covers tens of
+  thousands of episodes. `qdrss-ingest` fetches feeds, stores new items and embeds
+  them; run it on a schedule anywhere with the same `.env`, or leave
+  `QDRSS_INGEST_IN_APP=true` and the web app runs it hourly itself.
+  `scripts/migrate_sqlite_to_cosmos.py` loads an existing SQLite corpus, vectors
+  included, without re-embedding.
+- **SQLite** (default, tests, offline): items and cached vectors in one file, an
+  in-memory matrix rebuilt after each refresh.
+
 ## Sources
 
 `sources.yaml` lists the upstream feeds. They are fetched at startup and every

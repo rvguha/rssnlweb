@@ -41,8 +41,10 @@ class Index:
             mask &= self._collection == collection
         return mask
 
-    def search(self, vector: np.ndarray, mask: np.ndarray, limit: int) -> list[Candidate]:
-        rows = np.flatnonzero(mask)
+    async def search(
+        self, vector: np.ndarray, since: datetime | None, collection: str | None, limit: int
+    ) -> list[Candidate]:
+        rows = np.flatnonzero(self.eligible(since, collection))
         if not len(rows):
             return []
         scores = self.matrix[rows] @ vector
