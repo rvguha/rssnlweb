@@ -1,4 +1,4 @@
-# QD RSS — Query Defined RSS
+# rssnlweb — Query Defined RSS
 
 A natural-language query is a feed. The server keeps a corpus of upstream RSS/Atom
 items and, when a feed is fetched, returns the newest items that match the query.

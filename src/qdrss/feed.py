@@ -70,7 +70,7 @@ def render_rss(request: FeedRequest, matches: list[Match], base_url: str) -> byt
     ET.register_namespace("qd", NS)
     rss = ET.Element("rss", version="2.0")
     channel = ET.SubElement(rss, "channel")
-    ET.SubElement(channel, "title").text = f"QD RSS: {request.q}"
+    ET.SubElement(channel, "title").text = f"rssnlweb: {request.q}"
     params = {"q": request.q}
     if request.collection:
         params["collection"] = request.collection
