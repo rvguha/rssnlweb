@@ -26,7 +26,7 @@ StoreLike = Store  # any object with the async Store interface (see cosmos.Cosmo
 
 logger = logging.getLogger(__name__)
 TIMEOUT = httpx.Timeout(30.0)
-MAX_BYTES = 20 * 1024 * 1024
+MAX_BYTES = 64 * 1024 * 1024  # some daily shows ship 50 MB feeds (Good Morning Football)
 MAX_ARCHIVE_PAGES = 200
 
 
