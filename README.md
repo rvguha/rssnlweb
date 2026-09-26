@@ -67,9 +67,10 @@ OpenRouter, so check their catalogue before switching.
 
 **Cost.** A feed fetch is one embedding call (cached per query) plus
 `candidate_count / batch_size` ranking calls (8 by default). With gpt-oss-20b that is
-about 0.2 cents per fetch, so **1,000 fetches cost about $2**. Feed readers poll the
-same URL for months, so per-fetch cost is what scales, not per-query. The corpus
-embedding is a one-time cost per model.
+about 0.2 cents per fetch, so **1,000 fetches cost about $2**. Every fetch pays that:
+the rendered feed is not cached, so a reader polling a URL hourly costs ~$1.40 a month
+on its own, and 100 readers on the same URL cost 100x. Only the query's embedding is
+cached. The corpus embedding is a one-time cost per model.
 
 ## How a fetch works
 
