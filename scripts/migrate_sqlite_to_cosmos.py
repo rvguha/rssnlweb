@@ -9,6 +9,7 @@ configured embedding model are written without one; `qdrss-ingest` embeds them.
 from __future__ import annotations
 
 import asyncio
+import os
 import sys
 import time
 
@@ -33,7 +34,7 @@ async def main(path: str) -> None:
 
     cosmos = CosmosStore(config.cosmos_endpoint, config.cosmos_key, config.cosmos_database)
     await cosmos.setup()
-    sem = asyncio.Semaphore(4)
+    sem = asyncio.Semaphore(int(os.environ.get("MIGRATE_CONCURRENCY", "32")))
     done = 0
     started = time.time()
 
