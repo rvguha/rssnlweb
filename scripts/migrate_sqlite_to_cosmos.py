@@ -12,6 +12,8 @@ import asyncio
 import sys
 import time
 
+from azure.cosmos.exceptions import CosmosHttpResponseError
+
 from qdrss.config import load_config
 from qdrss.cosmos import CosmosStore, _document
 from qdrss.ingest import load_sources
@@ -31,7 +33,7 @@ async def main(path: str) -> None:
 
     cosmos = CosmosStore(config.cosmos_endpoint, config.cosmos_key, config.cosmos_database)
     await cosmos.setup()
-    sem = asyncio.Semaphore(16)
+    sem = asyncio.Semaphore(4)
     done = 0
     started = time.time()
 
@@ -42,7 +44,17 @@ async def main(path: str) -> None:
         item = replace(item, collection=collections.get(item.source, item.collection or "default"))
         doc = _document(item, vectors.get(item.id), model if item.id in vectors else None)
         async with sem:
-            await cosmos._items.upsert_item(doc)
+            for attempt in range(30):
+                try:
+                    await cosmos._items.upsert_item(doc)
+                    break
+                except CosmosHttpResponseError as exc:
+                    if exc.status_code != 429:
+                        raise
+                    wait = float(exc.headers.get("x-ms-retry-after-ms", 1000)) / 1000
+                    await asyncio.sleep(max(wait, 0.5) * (1 + attempt / 5))
+            else:
+                raise RuntimeError(f"gave up on {item.id} after repeated 429s")
         done += 1
         if done % 1000 == 0:
             print(f"{done}/{len(items)} in {time.time() - started:.0f}s")

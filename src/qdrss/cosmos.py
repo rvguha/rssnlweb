@@ -2,8 +2,11 @@
 
 One container, `items`, partitioned by collection, holds each episode with its
 embedding; Cosmos's DiskANN index answers the nearest-neighbour query with the
-date and collection filters applied inside the query. A second container,
-`sources`, holds fetch validators. The web app keeps nothing in memory.
+date and collection filters applied inside the query. Source fetch validators
+live in the same container under the reserved partition `_sources`: a vector
+index needs dedicated container throughput, and one container at the free
+tier's 1000 RU/s costs nothing while a second would. The web app keeps nothing
+in memory.
 """
 
 from __future__ import annotations
@@ -24,6 +27,7 @@ logger = logging.getLogger(__name__)
 DIMENSIONS = 1536
 SNIPPET_CHARS = 1500  # what the ranker sees
 CONTENT_CHARS = 8000  # what gets embedded
+SOURCES_PK = "_sources"  # partition holding fetch validators, never a real collection
 
 VECTOR_POLICY = {
     "vectorEmbeddings": [
@@ -51,9 +55,13 @@ def doc_id(item_id: str) -> str:
 
 
 class CosmosStore:
-    def __init__(self, endpoint: str, key: str, database: str = "qdrss"):
-        self.client = CosmosClient(endpoint, credential=key)
+    def __init__(self, endpoint: str, key: str, database: str = "qdrss", throughput: int = 1000):
+        # Retry 429s patiently: the free tier is 1000 RU/s shared by the database.
+        self.client = CosmosClient(
+            endpoint, credential=key, retry_total=20, retry_backoff_max=60
+        )
         self.database_name = database
+        self.throughput = throughput
         self._db = None
         self._items = None
         self._sources = None
@@ -61,15 +69,16 @@ class CosmosStore:
     async def setup(self) -> None:
         """Create database and containers if they do not exist. Idempotent."""
         self._db = await self.client.create_database_if_not_exists(self.database_name)
+        # Dedicated throughput: Cosmos refuses a vector index on a container that
+        # shares database-level throughput.
         self._items = await self._db.create_container_if_not_exists(
             id="items",
             partition_key=PartitionKey(path="/collection"),
             indexing_policy=INDEXING_POLICY,
             vector_embedding_policy=VECTOR_POLICY,
+            offer_throughput=self.throughput,
         )
-        self._sources = await self._db.create_container_if_not_exists(
-            id="sources", partition_key=PartitionKey(path="/name")
-        )
+        self._sources = self._items
 
     async def close(self) -> None:
         await self.client.close()
@@ -89,7 +98,7 @@ class CosmosStore:
 
     async def items_without_embedding(self, limit: int = 500) -> list[Item]:
         query = (
-            "SELECT TOP @limit * FROM c WHERE NOT IS_DEFINED(c.embedding)"
+            "SELECT TOP @limit * FROM c WHERE c.kind = 'item' AND NOT IS_DEFINED(c.embedding)"
         )
         rows = self._items.query_items(query, parameters=[{"name": "@limit", "value": limit}])
         return [_item(row) async for row in rows]
@@ -140,14 +149,15 @@ class CosmosStore:
         return [Candidate(_item(row), "vector", float(row["score"])) async for row in rows]
 
     async def count(self) -> int:
-        rows = self._items.query_items("SELECT VALUE COUNT(1) FROM c")
+        rows = self._items.query_items("SELECT VALUE COUNT(1) FROM c WHERE c.kind = 'item'")
         async for n in rows:
             return int(n)
         return 0
 
     async def counts_by_collection(self) -> dict[str, int]:
         rows = self._items.query_items(
-            "SELECT c.collection AS k, COUNT(1) AS n FROM c GROUP BY c.collection"
+            "SELECT c.collection AS k, COUNT(1) AS n FROM c WHERE c.kind = 'item' "
+            "GROUP BY c.collection"
         )
         return {row["k"]: int(row["n"]) async for row in rows}
 
@@ -155,7 +165,7 @@ class CosmosStore:
 
     async def source_state(self, name: str) -> dict[str, str | None]:
         try:
-            row = await self._sources.read_item(name, partition_key=name)
+            row = await self._sources.read_item(f"source:{name}", partition_key=SOURCES_PK)
         except exceptions.CosmosResourceNotFoundError:
             return {}
         return {k: row.get(k) for k in ("url", "etag", "last_modified", "sha256", "last_fetch", "last_error")}
@@ -173,7 +183,9 @@ class CosmosStore:
         previous = await self.source_state(name)
         await self._sources.upsert_item(
             {
-                "id": name,
+                "id": f"source:{name}",
+                "kind": "source",
+                "collection": SOURCES_PK,
                 "name": name,
                 "url": url,
                 "etag": etag if error is None else previous.get("etag"),
@@ -186,7 +198,8 @@ class CosmosStore:
 
     async def all_sources(self) -> list[dict[str, str | None]]:
         rows = self._sources.query_items(
-            "SELECT c.name, c.url, c.last_fetch, c.last_error FROM c ORDER BY c.name"
+            "SELECT c.name, c.url, c.last_fetch, c.last_error FROM c "
+            "WHERE c.kind = 'source' ORDER BY c.name"
         )
         return [dict(row) async for row in rows]
 
@@ -194,6 +207,7 @@ class CosmosStore:
 def _document(item: Item, vector: np.ndarray | None = None, model: str | None = None) -> dict:
     doc: dict[str, Any] = {
         "id": doc_id(item.id),
+        "kind": "item",
         "item_id": item.id,
         "source": item.source,
         "source_title": item.source_title,
