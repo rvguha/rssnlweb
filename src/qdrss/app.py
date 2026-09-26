@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import hashlib
 import logging
 import time
 from datetime import UTC, datetime
@@ -55,6 +56,12 @@ class Services:
         self.last_refresh: dict = {}
         self._task: asyncio.Task | None = None
         self._counts_cache: tuple[float, dict] | None = None
+        # Rendered feeds, keyed by the request. A feed only changes when the
+        # corpus does, so entries live until the next refresh completes (or the
+        # TTL, whichever is first). Readers poll the same URL for months; without
+        # this every poll pays a Cosmos vector query and eight LLM calls.
+        self._feeds: dict[tuple, tuple[float, bytes, str]] = {}
+        self.feed_ttl = config.refresh_minutes * 60
 
     @property
     def retriever(self) -> Retriever:
@@ -85,6 +92,7 @@ class Services:
         except Exception:
             logger.exception("indexing failed; serving the previous state")
         self._counts_cache = None
+        self._feeds.clear()
 
     async def embed_missing(self) -> int:
         """Cosmos mode: embed items that arrived without a vector, in batches."""
@@ -151,6 +159,14 @@ def build_services(config: Config | None = None) -> Services:
     return Services(config, HashEmbeddings(), KeywordRanker())
 
 
+def _feed_response(request: Request, body: bytes, etag: str) -> Response:
+    """The ETag is the list of item ids, so a reader whose copy is current gets a 304."""
+    headers = {"ETag": etag, "Cache-Control": "public, max-age=900"}
+    if request.headers.get("if-none-match") == etag:
+        return Response(status_code=304, headers=headers)
+    return Response(body, media_type="application/rss+xml; charset=utf-8", headers=headers)
+
+
 def create_app(services: Services) -> Starlette:
     async def feed(request: Request) -> Response:
         params = request.query_params
@@ -177,6 +193,13 @@ def create_app(services: Services) -> Starlette:
             return PlainTextResponse("index not built yet", status_code=503)
 
         feed_request = FeedRequest(q, since, limit, threshold, collection)
+        base = str(request.base_url).rstrip("/")
+        # since= makes the request time-specific, so only default-window fetches
+        # are cached (those are what feed readers send).
+        key = (q, limit, threshold, collection, base) if since is None else None
+        cached = services._feeds.get(key) if key else None
+        if cached and time.monotonic() - cached[0] < services.feed_ttl:
+            return _feed_response(request, cached[1], cached[2])
         try:
             matches = await evaluate(
                 feed_request,
@@ -190,9 +213,13 @@ def create_app(services: Services) -> Starlette:
         except RankingError as exc:
             logger.error("ranking failed: %s", exc)
             return PlainTextResponse(f"ranking unavailable: {exc}", status_code=503)
-        base = str(request.base_url).rstrip("/")
         body = render_rss(feed_request, matches, base)
-        return Response(body, media_type="application/rss+xml; charset=utf-8")
+        etag = '"' + hashlib.sha256(",".join(m.item.id for m in matches).encode()).hexdigest()[:24] + '"'
+        if key:
+            if len(services._feeds) > 5000:
+                services._feeds.pop(next(iter(services._feeds)))
+            services._feeds[key] = (time.monotonic(), body, etag)
+        return _feed_response(request, body, etag)
 
     async def home(_: Request) -> Response:
         return FileResponse(STATIC / "index.html")

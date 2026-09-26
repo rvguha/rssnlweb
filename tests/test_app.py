@@ -71,6 +71,24 @@ async def test_feed_endpoint(tmp_path):
         assert len(ET.fromstring(r.content).findall("channel/item")) == 2
         assert client.get("/collections").json() == {"ai": {"sources": 1, "items": 2}}
 
+        # default-window fetches are cached and carry an ETag; a matching
+        # If-None-Match gets 304 with no body
+        calls = []
+        real = services.ranker.structured
+
+        async def counting(instruction, payload):
+            calls.append(1)
+            return await real(instruction, payload)
+
+        services.ranker.structured = counting
+        r1 = client.get("/feed.xml?q=rust&collection=ai")
+        n = len(calls)
+        r2 = client.get("/feed.xml?q=rust&collection=ai")
+        assert r1.status_code == 200 and r2.content == r1.content and len(calls) == n
+        assert r1.headers["etag"] and r2.headers["etag"] == r1.headers["etag"]
+        r3 = client.get("/feed.xml?q=rust&collection=ai", headers={"If-None-Match": r1.headers["etag"]})
+        assert r3.status_code == 304 and r3.content == b""
+
         home = client.get("/")
         assert home.status_code == 200 and b"<form" in home.content
 
