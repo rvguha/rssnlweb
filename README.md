@@ -122,8 +122,10 @@ Two modes behind one interface, chosen by whether `COSMOS_ENDPOINT` is set.
 
 ## Sources
 
-`sources.yaml` lists the upstream feeds. They are fetched at startup and every
-`QDRSS_REFRESH_MINUTES` with ETag/Last-Modified; servers that ignore those are caught
+`sources.yaml` lists the upstream feeds, grouped into collections. They are fetched at
+startup and every `QDRSS_REFRESH_MINUTES` (360 in production, i.e. four times a day)
+with ETag/Last-Modified; new episodes are inserted by id, so nothing is ever
+duplicated; servers that ignore those are caught
 by a body hash. A malformed or failing feed keeps its previous items and validators
 and does not block the others. On a source's first fetch, ingest follows RFC 5005 `rel="next"` archive pages so a
 paginated feed's whole history lands in the store; later fetches read page one only.

@@ -32,7 +32,7 @@
   .tag { display: inline-block; padding: 0 6px; border-radius: 4px; background: var(--tag); color: var(--accent); font-size: 12px; margin-right: 6px; }
   .why { font-size: 14px; }
   .err { color: #c22; }
-  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 20px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 20px; }
   .tabs button { background: none; border: none; border-bottom: 2px solid transparent; border-radius: 0; color: var(--muted); padding: 8px 12px; margin-bottom: -1px; }
   .tabs button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); }
   .tabs small { color: var(--muted); font-size: 12px; margin-left: 4px; }
@@ -82,7 +82,7 @@ const QD = 'https://qdrss.dev/ns';
 const tabs = document.getElementById('tabs');
 let collection = '';  // '' = every collection
 
-const LABELS = { ai: 'AI podcasts', history: 'History podcasts' };
+const LABELS = { ai: 'AI', history: 'History', finance: 'Finance', international: 'International', cricket: 'Cricket', american_football: 'American football', soccer: 'Soccer' };
 function label(name) { return LABELS[name] || name.replace(/[-_]/g, ' '); }
 
 async function loadTabs() {

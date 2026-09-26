@@ -11,6 +11,7 @@ in memory.
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import logging
 from datetime import UTC, datetime
@@ -28,6 +29,7 @@ DIMENSIONS = 1536
 SNIPPET_CHARS = 1500  # what the ranker sees
 CONTENT_CHARS = 8000  # what gets embedded
 SOURCES_PK = "_sources"  # partition holding fetch validators, never a real collection
+WRITE_CONCURRENCY = 24
 
 VECTOR_POLICY = {
     "vectorEmbeddings": [
@@ -86,15 +88,22 @@ class CosmosStore:
     # --- items ---------------------------------------------------------------
 
     async def insert_missing(self, items: list[Item]) -> int:
-        """Create documents for items not yet stored. Existing ones are untouched."""
-        inserted = 0
-        for item in items:
-            try:
-                await self._items.create_item(_document(item))
-                inserted += 1
-            except exceptions.CosmosResourceExistsError:
-                continue
-        return inserted
+        """Create documents for items not yet stored. Existing ones are untouched.
+
+        Writes run concurrently: a feed's first fetch can carry a thousand items
+        and each create is a round trip.
+        """
+        sem = asyncio.Semaphore(WRITE_CONCURRENCY)
+
+        async def create(item: Item) -> int:
+            async with sem:
+                try:
+                    await self._items.create_item(_document(item))
+                    return 1
+                except exceptions.CosmosResourceExistsError:
+                    return 0
+
+        return sum(await asyncio.gather(*(create(item) for item in items)))
 
     async def items_without_embedding(self, limit: int = 500) -> list[Item]:
         query = (
@@ -103,21 +112,42 @@ class CosmosStore:
         rows = self._items.query_items(query, parameters=[{"name": "@limit", "value": limit}])
         return [_item(row) async for row in rows]
 
-    async def save_embeddings(self, model: str, vectors: dict[str, np.ndarray]) -> None:
-        for item_id, vector in vectors.items():
-            row = await self._read(item_id)
-            if row is None:
-                continue
-            row["embedding"] = [float(x) for x in vector]
-            row["embedding_model"] = model
-            await self._items.upsert_item(row)
+    async def save_embeddings(
+        self, model: str, vectors: dict[str, np.ndarray], collections: dict[str, str] | None = None
+    ) -> None:
+        """Attach vectors with a partial update: one round trip per item, no read.
 
-    async def _read(self, item_id: str) -> dict[str, Any] | None:
+        `collections` maps item id -> partition key; without it the partition is
+        looked up first, which doubles the round trips.
+        """
+        sem = asyncio.Semaphore(WRITE_CONCURRENCY)
+
+        async def patch(item_id: str, vector: np.ndarray) -> None:
+            pk = (collections or {}).get(item_id) or await self._partition_of(item_id)
+            if pk is None:
+                return
+            async with sem:
+                try:
+                    await self._items.patch_item(
+                        doc_id(item_id),
+                        partition_key=pk,
+                        patch_operations=[
+                            {"op": "set", "path": "/embedding", "value": [float(x) for x in vector]},
+                            {"op": "set", "path": "/embedding_model", "value": model},
+                        ],
+                    )
+                except exceptions.CosmosResourceNotFoundError:
+                    return
+
+        await asyncio.gather(*(patch(i, v) for i, v in vectors.items()))
+
+    async def _partition_of(self, item_id: str) -> str | None:
         rows = self._items.query_items(
-            "SELECT * FROM c WHERE c.id = @id", parameters=[{"name": "@id", "value": doc_id(item_id)}]
+            "SELECT c.collection FROM c WHERE c.id = @id",
+            parameters=[{"name": "@id", "value": doc_id(item_id)}],
         )
         async for row in rows:
-            return row
+            return row["collection"]
         return None
 
     async def search(

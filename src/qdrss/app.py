@@ -103,7 +103,9 @@ class Services:
                 return total
             vectors = await self.embedder.embed([item.text[:8000] for item in items])
             await self.store.save_embeddings(
-                self.embedder.model, {item.id: vectors[i] for i, item in enumerate(items)}
+                self.embedder.model,
+                {item.id: vectors[i] for i, item in enumerate(items)},
+                {item.id: item.collection for item in items},
             )
             total += len(items)
             logger.info("embedded %d items (%d so far)", len(items), total)

@@ -160,7 +160,9 @@ class Store:
                 found[item_id] = np.frombuffer(blob, dtype=np.float32)
         return found
 
-    def save_embeddings(self, model: str, vectors: dict[str, np.ndarray]) -> None:
+    def save_embeddings(
+        self, model: str, vectors: dict[str, np.ndarray], collections: dict | None = None
+    ) -> None:
         with self.db:
             self.db.executemany(
                 "INSERT OR REPLACE INTO embeddings VALUES (?,?,?)",

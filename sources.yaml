@@ -406,3 +406,515 @@ history:
   url: https://feed.podbean.com/hopwag/feed.xml
 - name: the_latin_american_history_podcast
   url: https://feeds.redcircle.com/db4d04b0-02b5-4691-81a7-b583a8052e89
+
+finance:
+- name: odd_lots
+  url: https://www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/8a94442e-5a74-4fa2-8b8d-ae27003a8d6b/982f5071-765c-403d-969d-ae27003a8d83/podcast.rss
+  # Odd Lots — Bloomberg (Weisenthal/Alloway); 3x/week
+- name: planet_money
+  url: https://feeds.npr.org/510289/podcast.xml
+  # Planet Money — NPR; 2x/week
+- name: the_indicator
+  url: https://feeds.npr.org/510325/podcast.xml
+  # The Indicator from Planet Money — NPR; weekdays
+- name: animal_spirits
+  url: https://feeds.megaphone.fm/TCP6464651487
+  # Animal Spirits — The Compound (Batnick/Carlson); 2x/week
+- name: compound_and_friends
+  url: https://feeds.megaphone.fm/TCP4771071679
+  # The Compound and Friends — Josh Brown; weekly
+- name: invest_like_the_best
+  url: https://feeds.megaphone.fm/CLS2859450455
+  # Invest Like the Best — Patrick O'Shaughnessy; weekly
+- name: money_stuff
+  url: https://www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/ee4336cb-155f-4488-90e0-b1400134e40e/77e6a3a7-290d-4a82-8164-b14001353ef2/podcast.rss
+  # Money Stuff: The Podcast — Bloomberg (Matt Levine); weekly
+- name: macro_voices
+  url: https://feed.podbean.com/macrovoices/feed.xml
+  # Macro Voices — Erik Townsend; weekly
+- name: bogleheads
+  url: https://feed.podbean.com/bogleheads/feed.xml
+  # Bogleheads On Investing — Rick Ferri; monthly
+- name: we_study_billionaires
+  url: https://feeds.megaphone.fm/PPLLC8974708240
+  # We Study Billionaires — The Investor's Podcast; several/week
+- name: bloomberg_surveillance
+  url: https://www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/8e704079-ca57-4eac-9741-ae27003e2b7f/9739700c-72c3-4176-ae55-ae27003e2b96/podcast.rss
+  # Bloomberg Surveillance — Bloomberg; weekdays
+- name: masters_in_business
+  url: https://www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/4e4cd910-40a1-4619-a5f3-ae2b0012ffff/5873a3cb-298f-40bc-b71f-ae2b0013000d/podcast.rss
+  # Masters in Business — Bloomberg (Barry Ritholtz); weekly
+- name: rational_reminder
+  url: https://rss.libsyn.com/shows/127327/destinations/763774.xml
+  # The Rational Reminder Podcast — Ben Felix / PWL; weekly
+- name: meb_faber
+  url: https://feeds.megaphone.fm/TIFM6133783130
+  # The Meb Faber Show — Meb Faber; weekly+
+- name: marketplace
+  url: https://feeds.publicradio.org/public_feeds/marketplace
+  # Marketplace — APM (Kai Ryssdal); weekdays
+- name: marketplace_morning
+  url: https://feeds.publicradio.org/public_feeds/marketplace-morning-report
+  # Marketplace Morning Report — APM; daily
+- name: money_for_the_rest_of_us
+  url: https://rss.art19.com/money-for-the-rest-of-us
+  # Money For the Rest of Us — J. David Stein; weekly
+- name: afford_anything
+  url: https://feeds.megaphone.fm/PDR2376775771
+  # Afford Anything — Paula Pant; 2x/week
+- name: choosefi
+  url: https://feeds.choosefi.com/rss/choosefi-podcast
+  # ChooseFI — ChooseFI; weekly
+- name: capital_allocators
+  url: https://rss.libsyn.com/shows/94820/destinations/482814.xml
+  # Capital Allocators — Ted Seides; 2x/week
+- name: excess_returns
+  url: https://anchor.fm/s/9a1dfac/podcast/rss
+  # Excess Returns — Jack Forehand / Matt Zeigler; several/week
+- name: forward_guidance
+  url: https://feeds.megaphone.fm/forwardguidance
+  # Forward Guidance — Blockworks; several/week
+- name: macro_musings
+  url: https://rss.libsyn.com/shows/138806/destinations/865793.xml
+  # Macro Musings — Mercatus (David Beckworth); weekly
+- name: merryn_talks_money
+  url: https://www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/1742e0df-336e-4798-9bdf-af4d00f3c918/b65f5d94-dd18-419c-9276-af4d00f43c32/podcast.rss
+  # Merryn Talks Money — Bloomberg; weekly
+- name: wsj_the_journal
+  url: https://video-api.shdsvc.dowjones.io/api/podcasts/feed/the%20journal
+  # The Journal. — WSJ; weekdays
+- name: the_long_view
+  url: https://feeds.simplecast.com/5SEwkJYi
+  # The Long View — Morningstar; weekly
+- name: fintech_insider
+  url: https://feeds.megaphone.fm/FS9665566819
+  # Fintech Insider — 11:FS; several/week
+- name: barrons_streetwise
+  url: https://video-api.shdsvc.dowjones.io/api/podcasts/feed/streetwise
+  # Barron's Streetwise — Barron's (Jack Hough); weekly
+- name: unhedged
+  url: https://feeds.acast.com/public/shows/6478a825654260001190a7cb
+  # Unhedged — Financial Times (Rob Armstrong); 2x/week
+- name: rule_breaker_investing
+  url: https://feeds.megaphone.fm/ARML2428817190
+  # Rule Breaker Investing — Motley Fool (David Gardner); weekly
+- name: acquired
+  url: https://feeds.transistor.fm/acquired
+  # Acquired — Gilbert & Rosenthal; monthly
+- name: economics_show_ft
+  url: https://feeds.acast.com/public/shows/664394a442f6710013618119
+  # The Economics Show — Financial Times; weekly
+- name: money_talks_economist
+  url: https://access.acast.com/rss/39fc4a99-8861-437d-81e2-684d13e48f92
+  # Money Talks from The Economist — The Economist; weekly
+- name: wsj_whats_news
+  url: https://video-api.shdsvc.dowjones.io/api/podcasts/feed/the%20wall%20street%20journal%20whats%20news
+  # WSJ What's News — WSJ; daily
+
+
+international:
+- name: the_intelligence
+  url: https://access.acast.com/rss/d556eb54-6160-4c85-95f4-47d9f5216c49
+  # The Intelligence from The Economist — The Economist; weekdays
+- name: world_in_brief
+  url: https://access.acast.com/rss/theeconomistmorningbriefing/default
+  # The World in Brief from The Economist — The Economist; daily
+- name: drum_tower
+  url: https://access.acast.com/rss/633ebf6dfc7f5a0012acdc97
+  # Drum Tower — The Economist (China); weekly
+- name: bbc_global_news
+  url: https://podcasts.files.bbci.co.uk/p02nq0gn.rss
+  # Global News Podcast — BBC World Service; 2x daily
+- name: bbc_global_story
+  url: https://podcasts.files.bbci.co.uk/w13xtvsd.rss
+  # The Global Story — BBC World Service; weekdays
+- name: bbc_newshour
+  url: https://podcasts.files.bbci.co.uk/p002vsnk.rss
+  # Newshour — BBC World Service; daily
+- name: bbc_the_inquiry
+  url: https://podcasts.files.bbci.co.uk/p029399x.rss
+  # The Inquiry — BBC World Service; weekly
+- name: pod_save_the_world
+  url: https://audioboom.com/channels/5166626.rss
+  # Pod Save the World — Crooked Media; weekly
+- name: foreign_affairs_interview
+  url: https://feed.podbean.com/foreignaffairsmagazine/feed.xml
+  # The Foreign Affairs Interview — Foreign Affairs; biweekly
+- name: war_on_the_rocks
+  url: https://rss.libsyn.com/shows/70702/destinations/298196.xml
+  # War on the Rocks — Ryan Evans; weekly
+- name: rest_is_politics
+  url: https://feeds.megaphone.fm/GLT9190936013
+  # The Rest Is Politics — Goalhanger (Campbell/Stewart); 2x/week
+- name: rest_is_politics_us
+  url: https://feeds.megaphone.fm/GLT5336643697
+  # The Rest Is Politics: US — Goalhanger (Kay/Scaramucci); weekly
+- name: dw_inside_europe
+  url: https://rss.dw.com/xml/podcast_inside-europe
+  # Inside Europe — Deutsche Welle; weekly
+- name: dw_news_brief
+  url: https://rss.dw.com/syndication/feeds/podcast_en_newsbrief.33191-mrss.xml
+  # DW News Brief — Deutsche Welle; daily
+- name: france24_the_debate
+  url: https://apis.france24.com/products/get_product/f24_getpodcast_audio_by_nid?token_application=33d60288-7e20-11e9-884b-005056a9c687&program.entrepriseId=WB4897007-F24-EN-20091009
+  # The Debate — FRANCE 24; weekdays
+- name: aljazeera_the_take
+  url: https://www.omnycontent.com/d/playlist/9c074afa-3313-47e8-b802-a9f900789975/09af2160-238f-48b2-b20b-ad4b00ebd8e7/b86dddc1-67a5-41c2-a13c-ad4b00ebd8f5/podcast.rss
+  # The Take — Al Jazeera; weekdays
+- name: presidents_inbox
+  url: https://feed.podbean.com/thepresidentsinbox/feed.xml
+  # The President's Inbox — CFR (James Lindsay); weekly
+- name: grand_tamasha
+  url: https://feeds.simplecast.com/dJuLIw5J
+  # Grand Tamasha — Carnegie (Milan Vaishnav); weekly
+- name: sinica
+  url: https://rss.art19.com/sinica
+  # Sinica Podcast — Kaiser Kuo; weekly
+- name: pekingology
+  url: https://feeds.megaphone.fm/pekingology
+  # Pekingology — CSIS; weekly
+- name: foreign_policy_live
+  url: https://feeds.megaphone.fm/FGP8797000077
+  # Foreign Policy Live — Foreign Policy (Ravi Agrawal); weekly
+- name: global_dispatches
+  url: https://rss.libsyn.com/shows/41455/destinations/125334.xml
+  # Global Dispatches — Mark Leon Goldberg; 2x/week
+- name: deep_dish
+  url: https://rss.libsyn.com/shows/107155/destinations/580050.xml
+  # Deep Dish on Global Affairs — Chicago Council; weekly
+- name: the_europeans
+  url: https://feeds.captivate.fm/the-europeans/
+  # The Europeans — Katy Lee / Dominic Kraemer; weekly
+- name: battleground
+  url: https://feeds.acast.com/public/shows/6a22b52017f169d6433fb960
+  # Battleground — Goalhanger (Saul David / Patrick Bishop); 2x/week
+- name: ukraine_the_latest
+  url: https://feeds.acast.com/public/shows/6583012e715d5300169dcdcb
+  # Ukraine: The Latest — The Telegraph; weekdays
+- name: reuters_world_news
+  url: https://feeds.megaphone.fm/reutersworldnews
+  # Reuters World News — Reuters; daily
+- name: asia_geopolitics
+  url: https://anchor.fm/s/10bd6f2ac/podcast/rss
+  # Asia Geopolitics — The Diplomat (Ankit Panda); weekly
+- name: monocle_foreign_desk
+  url: https://www.omnycontent.com/d/playlist/e6127ab7-b81e-456b-893c-a8d600215365/7b9f282e-1b97-4d40-a38f-ab8a0123a4e7/ed6a263e-d325-4e94-a10c-ab8a0123a4ec/podcast.rss
+  # The Foreign Desk — Monocle (Andrew Mueller); weekly
+- name: rest_is_politics_leading
+  url: https://feeds.megaphone.fm/GLT9029505120
+  # The Rest Is Politics: Leading — Goalhanger; weekly
+- name: intelligence_squared
+  url: https://feeds.megaphone.fm/NSR6363847171
+  # Intelligence Squared — Intelligence Squared; several/week
+- name: today_explained
+  url: https://feeds.megaphone.fm/VMP5705694065
+  # Today, Explained — Vox; weekdays
+- name: the_news_agents
+  url: https://feeds.captivate.fm/the-news-agents/
+  # The News Agents — Global; weekdays
+- name: bbc_americast
+  url: https://podcasts.files.bbci.co.uk/p07h19zz.rss
+  # Americast — BBC; 2x/week
+- name: geopolitics_decanted
+  url: https://podcast.silverado.org/feed.xml
+  # Geopolitics Decanted — Silverado Policy Accelerator; biweekly
+- name: monocle_globalist
+  url: https://www.omnycontent.com/d/playlist/e6127ab7-b81e-456b-893c-a8d600215365/9c42dc1e-9f07-4f76-b8fb-ab8a0120014e/f2eddba2-287e-448b-a454-ab8a01200152/podcast.rss
+  # The Globalist — Monocle; weekdays
+- name: bbc_world_business_report
+  url: https://podcasts.files.bbci.co.uk/p00fvhj7.rss
+  # World Business Report — BBC World Service; weekdays
+- name: power_vertical
+  url: https://feeds.soundcloud.com/users/soundcloud:users:881550946/sounds.rss
+  # The Power Vertical — Brian Whitmore; weekly
+
+
+cricket:
+- name: grade_cricketer
+  url: https://www.omnycontent.com/d/playlist/d3d56d8d-11c9-411a-aade-af8f001be4a7/f9ddc13f-8a37-4937-81c7-b081006fa5c2/ebea9171-5a2f-4a13-96e0-b081006fa5e8/podcast.rss
+  # The Grade Cricketer — Sam Perry / Ian Higgins; several/week
+- name: tailenders
+  url: https://podcasts.files.bbci.co.uk/p02pcb4w.rss
+  # Tailenders — BBC 5 Live; weekly
+- name: test_match_special
+  url: https://podcasts.files.bbci.co.uk/p02nrsl2.rss
+  # Test Match Special — BBC 5 Live; daily in season
+- name: wisden_cricket_weekly
+  url: https://feeds.megaphone.fm/COMG4211358924
+  # Wisden Cricket Weekly — Wisden; weekly
+- name: the_cricket_podcast
+  url: https://feeds.megaphone.fm/COMG4490649682
+  # The Cricket Podcast — Sam Sherwood & co; seasonal
+- name: sky_sports_cricket
+  url: https://feeds.captivate.fm/sky-sports-cricket/
+  # Sky Sports Cricket Podcast — Sky Sports; weekly in season
+- name: the_cricketer
+  url: https://feeds.acast.com/public/shows/6666ceb9c368870012369f63
+  # The Cricketer Podcasts — The Cricketer magazine; weekly
+- name: cricketer_county_conversation
+  url: https://feeds.acast.com/public/shows/660be8e59446cb0016dcf67a
+  # The Cricketer's County Conversation — The Cricketer; weekly in season
+- name: following_on_talksport
+  url: https://feeds.acast.com/public/shows/d0e70954-32ac-4e91-86c3-1c34bfb4a075
+  # Following On — talkSPORT; daily in season
+- name: stumped
+  url: https://podcasts.files.bbci.co.uk/p02gsrmh.rss
+  # Stumped — BBC World Service / ABC / AIR; weekly
+- name: analyst_inside_cricket
+  url: https://feeds.megaphone.fm/COMG5373347098
+  # The Analyst Inside Cricket — Simon Hughes; weekly+
+- name: cricket_unfiltered
+  url: https://feeds.megaphone.fm/COMG4173210327
+  # Cricket Unfiltered — Piccolo Podcasts; several/week
+- name: cricket_et_al
+  url: https://www.omnycontent.com/d/playlist/d3d56d8d-11c9-411a-aade-af8f001be4a7/0dd1e456-74d1-4bcc-9639-b15000764415/94f1778d-411f-4bc2-be4e-b15000775476/podcast.rss
+  # Cricket Et Al — Atherton / Hussain; weekly
+- name: stick_to_cricket
+  url: https://feeds.acast.com/public/shows/6846adca87509b9b807beb20
+  # Stick to Cricket — The Overlap (Vaughan/Broad/Swann/Tuffnell); weekly
+- name: final_word_cricket
+  url: https://feeds.megaphone.fm/COMG4127829564
+  # The Final Word Cricket Podcast — Adam Collins / Geoff Lemon; several/week
+- name: good_areas
+  url: https://feeds.simplecast.com/OCjI_9eh
+  # Good Areas Podcast — Jarrod Kimber; several/week
+- name: the_last_wicket
+  url: https://feeds.captivate.fm/thelastwicket/
+  # The Last Wicket — Cricket Guys; weekly
+- name: telegraph_cricket
+  url: https://feeds.acast.com/public/shows/657c9f0c47124c0016f22beb
+  # The Telegraph Cricket Podcast — The Telegraph; weekly in season
+- name: its_not_just_cricket
+  url: https://feeds.megaphone.fm/COMG5632971675
+  # It's Not Just Cricket — ex-players (RARE); weekly
+- name: abc_cricket
+  url: https://www.abc.net.au/feeds/13653330/podcast.xml
+  # ABC Cricket Podcast — ABC Australia; weekly+
+- name: unplayable_podcast
+  url: https://www.omnycontent.com/d/playlist/fa326977-3de5-4283-9b8b-af3500c58607/cef5846a-91d6-43fd-90e5-b3920031c00c/7e7b3745-0957-478b-97b1-b3920031c013/podcast.rss
+  # The Unplayable Podcast — Cricket Australia; weekly
+- name: switch_hit
+  url: https://anchor.fm/s/1139baa00/podcast/rss
+  # Switch Hit Podcast — ESPNcricinfo; weekly
+- name: rock_and_roll_it
+  url: https://anchor.fm/s/1070deb40/podcast/rss
+  # Rock and Roll it — ESPNcricinfo; irregular
+- name: county_cricket_podcast
+  url: https://feed.podbean.com/thecountycricketpodcast/feed.xml
+  # The County Cricket Podcast — independent; weekly in season
+- name: emerging_cricket
+  url: https://feed.podbean.com/emergingcricket/feed.xml
+  # The Emerging Cricket Podcast — Emerging Cricket; irregular
+- name: cricket_slouch
+  url: https://rss.buzzsprout.com/1976713.rss
+  # The Cricket Slouch — Indian fan pod; irregular
+- name: 98_not_out
+  url: https://anchor.fm/s/c35cbe8/podcast/rss
+  # 98 Not Out — independent; weekly
+- name: byc_podcast
+  url: https://www.omnycontent.com/d/playlist/7784f840-c291-422a-924b-ad9000bbad71/f471b2a1-18b5-478a-bb27-adef016c50fe/117551c5-f081-4f2b-be60-adef016c5128/podcast.rss
+  # The BYC Podcast — Alternative Commentary Collective (NZ); weekly
+- name: white_noise_cricket
+  url: https://anchor.fm/s/e118d954/podcast/rss
+  # White Noise Cricket Podcast — independent; weekly
+- name: murali_end
+  url: https://feeds.captivate.fm/the-murali-end/
+  # The Murali End — independent; irregular
+
+
+american_football:
+- name: ringer_nfl_show
+  url: https://feeds.megaphone.fm/the-ringer-nfl-show
+  # The Ringer NFL Show — The Ringer; several/week
+- name: ringer_fantasy_football
+  url: https://feeds.megaphone.fm/ringer-fantasy-football-show
+  # The Ringer Fantasy Football Show — The Ringer; several/week
+- name: nfl_daily
+  url: https://www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/9ce11dad-e86a-444f-ba83-ae27003475be/deff018f-4b51-4501-937c-ae27003475d1/podcast.rss
+  # NFL Daily with Gregg Rosenthal — NFL Media; daily
+- name: move_the_sticks
+  url: https://feeds.megaphone.fm/ESP7119271898
+  # Move the Sticks — ESPN (Daniel Jeremiah); weekly+
+- name: bill_barnwell_show
+  url: https://feeds.megaphone.fm/ESP4493005942
+  # The Bill Barnwell Show — ESPN; weekly+
+- name: athletic_football_show
+  url: https://feeds.acast.com/public/shows/681cc905bdc60241406b737f
+  # The Athletic Football Show — The Athletic (Robert Mays); several/week
+- name: fantasy_footballers
+  url: https://feeds.simplecast.com/sw7PGWfw
+  # Fantasy Footballers — Andy / Mike / Jason; daily in season
+- name: the_audible_footballguys
+  url: https://theaudible.libsyn.com/rss
+  # The Audible — Footballguys; several/week
+- name: footballguys_daily
+  url: https://rss.libsyn.com/shows/550267/destinations/4748752.xml
+  # The Footballguys Daily Update — Footballguys; daily
+- name: solid_verbal
+  url: https://www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/21437ee1-47d9-4b16-8696-b30d011a2c26/51c7e0eb-425c-4d93-b5a8-b30d011a2c46/podcast.rss
+  # The Solid Verbal — Hildenbrandt / Rubenstein; 2x/week
+- name: cover_3_college
+  url: https://rss.amperwave.net/v2/feed/audacynetwork/4d511b61eff9f56a1fca4042ba77c21c
+  # Cover 3 College Football — CBS Sports; several/week
+- name: audible_stew_bruce_ralph
+  url: https://feeds.acast.com/public/shows/681ccd385acb8b715f1f94f4
+  # The Audible with Stew, Bruce & Ralph — The Athletic; 2x/week
+- name: pat_mcafee
+  url: https://feeds.megaphone.fm/ESP7297553965
+  # The Pat McAfee Show — ESPN; daily
+- name: green_light_chris_long
+  url: https://feeds.megaphone.fm/greenlightwithchrislong
+  # Green Light with Chris Long — Chris Long; several/week
+- name: mina_kimes
+  url: https://feeds.megaphone.fm/ESP8957020927
+  # The Mina Kimes Show — ESPN; weekly+
+- name: ross_tucker
+  url: https://feeds.megaphone.fm/DFT5818254302
+  # Ross Tucker Football Podcast — Ross Tucker; daily
+- name: first_draft_espn
+  url: https://feeds.megaphone.fm/ESP5707918440
+  # First Draft — ESPN (Kiper/Yates); weekly
+- name: fantasy_focus_espn
+  url: https://feeds.megaphone.fm/ESP7699980268
+  # Fantasy Focus Football — ESPN; daily
+- name: locked_on_nfl
+  url: https://rss.pdrl.fm/1a2c72/feeds.simplecast.com/zx_GShic
+  # Locked On NFL — Locked On; daily
+- name: establish_the_run
+  url: https://anchor.fm/s/60e53980/podcast/rss
+  # Establish The Run — ETR; several/week
+- name: always_college_football
+  url: https://feeds.megaphone.fm/ESP6982832924
+  # Always College Football — ESPN (Greg McElroy); several/week
+- name: paul_finebaum
+  url: https://feeds.megaphone.fm/ESP1569616864
+  # The Paul Finebaum Show — ESPN / SEC Network; daily
+- name: college_football_enquirer
+  url: https://feeds.simplecast.com/9Unh1yK9
+  # College Football Enquirer — Yahoo Sports; several/week
+- name: andy_and_ari_on3
+  url: https://feeds.simplecast.com/6Vtat3Ig
+  # Andy & Ari On3 — On3; daily
+- name: split_zone_duo
+  url: https://api.substack.com/feed/podcast/2043967.rss
+  # Split Zone Duo — Johnson / Kirshner; 2x/week
+- name: josh_pate_cfb
+  url: https://rss.pdrl.fm/9f7afa/www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/daca7931-e14b-4914-b693-b33100f0b4dc/b0c69b90-3aca-495e-b4ef-b33100f0b4e5/podcast.rss
+  # Josh Pate's College Football Show — iHeart; daily
+- name: good_morning_football
+  url: https://www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/b3c7466a-617e-42e6-8e1c-ae270033f8bb/30912f7a-374b-4a82-8cbc-ae270033f8d7/podcast.rss
+  # NFL: Good Morning Football — NFL Media; daily
+- name: pff_nfl
+  url: https://feeds.simplecast.com/U644ZfMt
+  # The PFF NFL Podcast — PFF; several/week
+- name: sharp_football
+  url: https://feeds.simplecast.com/UiNmc8XS
+  # Sharp Football Analysis — Warren Sharp; several/week
+- name: football_301
+  url: https://feeds.simplecast.com/Nvy5cWFT
+  # Football 301 — Yahoo Sports (Nate Tice); 2x/week
+- name: new_heights
+  url: https://rss.art19.com/new-heights
+  # New Heights — Kelce brothers; weekly
+- name: adam_schefter
+  url: https://feeds.megaphone.fm/ESP3620980398
+  # The Adam Schefter Podcast — ESPN; weekly
+
+
+soccer:
+- name: athletic_fc
+  url: https://feeds.acast.com/public/shows/6818be7d1d28d62313ac8ef3
+  # The Athletic FC Podcast — The Athletic; weekdays
+- name: athletic_fc_tactics
+  url: https://feeds.acast.com/public/shows/681ccc7c8b1f3232bc1e797e
+  # The Athletic FC Tactics Podcast — The Athletic; weekly
+- name: men_in_blazers
+  url: https://rss.art19.com/men-in-blazers
+  # Men In Blazers — Roger Bennett; several/week
+- name: football_weekly
+  url: https://www.theguardian.com/football/series/footballweekly/podcast.xml
+  # Football Weekly — The Guardian; 3x/week
+- name: totally_football_show
+  url: https://feeds.acast.com/public/shows/6818cd43eb146d8e35d312c7
+  # The Totally Football Show — James Richardson; 2x/week
+- name: tifo_football
+  url: https://feeds.acast.com/public/shows/681cccd63e6644d7a3b3065c
+  # Tifo Football Podcast — The Athletic / Tifo; several/week
+- name: rest_is_football
+  url: https://feeds.megaphone.fm/GLT8847082992
+  # The Rest Is Football — Goalhanger (Lineker/Shearer/Richards); several/week
+- name: espn_fc
+  url: https://feeds.megaphone.fm/ESP9520742908
+  # ESPN FC — ESPN; weekdays
+- name: gab_and_juls
+  url: https://feeds.megaphone.fm/ESP8176852521
+  # The Gab & Juls Show — ESPN (Marcotti/Laurens); weekly
+- name: football_ramble
+  url: https://feeds.acast.com/public/shows/8af0c347-5e6e-48e2-8fae-3f4e765c84ab
+  # Football Ramble — Stak; several/week
+- name: caught_offside
+  url: https://feeds.acast.com/public/shows/6346d9bc8f0d4900116ba1ee
+  # Caught Offside — Andy Brassell & co; several/week
+- name: anfield_wrap
+  url: https://feeds.megaphone.fm/COMG6516013185
+  # The Anfield Wrap — TAW (Liverpool); daily
+- name: the_overlap
+  url: https://feeds.acast.com/public/shows/d2a98018-244b-4999-9a83-9c2b9d43a1e3
+  # The Overlap — Gary Neville; weekly+
+- name: stick_to_football
+  url: https://feeds.acast.com/public/shows/65118b05e7b19e00113ac2c0
+  # Stick to Football — The Overlap; weekly
+- name: peter_crouch
+  url: https://feeds.acast.com/public/shows/6242e9f71c8beb00139400a6
+  # That Peter Crouch Podcast — Crouch / Chris Stark; weekly
+- name: football_cliches
+  url: https://feeds.megaphone.fm/GLT7974369854
+  # Football Cliches — Adam Hurrey; weekly+
+- name: sky_premier_league
+  url: https://feeds.captivate.fm/sky-sports-premierleague/
+  # Sky Sports Premier League Podcast — Sky Sports; several/week
+- name: gary_neville_podcast
+  url: https://feeds.captivate.fm/the-gary-neville-podcast/
+  # The Gary Neville Podcast — Sky Sports; weekly
+- name: premier_league_all_access
+  url: https://feeds.acast.com/public/shows/3ed1497c-1c80-46be-b6d5-22ab6a9b18fb
+  # Premier League All Access — talkSPORT; several/week
+- name: revista_de_la_liga
+  url: https://api.substack.com/feed/podcast/2777468.rss
+  # Revista de la Liga — Graham Hunter; several/week
+- name: spanish_football_podcast
+  url: https://feeds.megaphone.fm/GLT4632612630
+  # The Spanish Football Podcast — Goalhanger (Sid Lowe et al); weekly
+- name: the_game_times
+  url: https://feeds.acast.com/public/shows/0fc6a233-bbae-4ba5-b882-c075544353a8
+  # The Game — The Times; several/week
+- name: fozcast
+  url: https://feeds.megaphone.fm/GLT6069920566
+  # Fozcast — Ben Foster; weekly+
+- name: arsecast
+  url: https://feeds.acast.com/public/shows/a1a58121-6fb4-43cf-8156-8d6df6fc312f
+  # Arseblog Arsecast — arseblog (Arsenal); several/week
+- name: redmen_tv
+  url: https://feeds.acast.com/public/shows/52fa29b2-4f7d-4d5c-8d36-d1cb2a782d0e
+  # The Redmen TV — Redmen TV (Liverpool); daily
+- name: stretford_paddock
+  url: https://feeds.megaphone.fm/COMG2101809856
+  # Manchester United Podcast by Stretford Paddock — Stretford Paddock; several/week
+- name: bbc_football_daily
+  url: https://podcasts.files.bbci.co.uk/p02nrsln.rss
+  # Football Daily — BBC 5 Live; daily
+- name: quickly_kevin
+  url: https://feeds.megaphone.fm/GLT1867349414
+  # Quickly Kevin; will he score? — Widdicombe / Scull / Marden; weekly
+- name: the_cooligans
+  url: https://feeds.simplecast.com/T15cXQd0
+  # The Cooligans — Guerreros / Polanco (US); several/week
+- name: call_it_what_you_want
+  url: https://rss.amperwave.net/v2/feed/audacynetwork/insoccerwetrust
+  # Call It What You Want — CBS Golazo (USMNT/MLS); weekly+
+- name: womens_football_weekly
+  url: https://www.theguardian.com/football/series/theguardianswomensfootballweekly/podcast.xml
+  # The Guardian's Women's Football Weekly — The Guardian; weekly
+- name: the_womens_game
+  url: https://rss.art19.com/the-womens-game
+  # The Women's Game — Men in Blazers; weekly
