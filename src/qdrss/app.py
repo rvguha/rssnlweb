@@ -139,7 +139,7 @@ class Services:
             sys.executable, "-c", "from qdrss.app import ingest_main; ingest_main()",
             stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT,
         )
-        summary: dict = {"at": datetime.now(UTC).isoformat(), "new_items": None, "errors": {}}
+        summary: dict = {"at": None, "new_items": None, "errors": {}}
         assert proc.stdout is not None
         async for raw in proc.stdout:
             line = raw.decode(errors="replace").rstrip()
@@ -153,6 +153,7 @@ class Services:
         code = await proc.wait()
         if code != 0:
             summary["errors"]["_process"] = f"exit {code}"
+        summary["at"] = datetime.now(UTC).isoformat()  # completion, not start
         self.last_refresh = summary
         self._counts_cache = None
         self._feeds.clear()
