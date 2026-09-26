@@ -107,7 +107,7 @@ class Services:
         for source in self.sources:
             out.setdefault(source.collection, {"sources": 0, "items": 0})["sources"] += 1
         if self.cosmos:
-            for name, n in (await self.store.counts_by_collection()).items():
+            for name, n in (await self.store.counts_by_collection(list(out))).items():
                 out.setdefault(name, {"sources": 0, "items": 0})["items"] = n
         else:
             counts = self.store.counts_by_source()

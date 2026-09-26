@@ -154,12 +154,18 @@ class CosmosStore:
             return int(n)
         return 0
 
-    async def counts_by_collection(self) -> dict[str, int]:
-        rows = self._items.query_items(
-            "SELECT c.collection AS k, COUNT(1) AS n FROM c WHERE c.kind = 'item' "
-            "GROUP BY c.collection"
-        )
-        return {row["k"]: int(row["n"]) async for row in rows}
+    async def counts_by_collection(self, collections: list[str]) -> dict[str, int]:
+        # One single-partition count per collection: cross-partition queries
+        # only allow bare VALUE aggregates, and the collection is the partition key.
+        out: dict[str, int] = {}
+        for name in collections:
+            rows = self._items.query_items(
+                "SELECT VALUE COUNT(1) FROM c WHERE c.kind = 'item'", partition_key=name
+            )
+            out[name] = 0
+            async for n in rows:
+                out[name] = int(n)
+        return out
 
     # --- sources -------------------------------------------------------------
 
