@@ -145,8 +145,21 @@ class CosmosStore:
             f"FROM c WHERE {' AND '.join(clauses)} "
             "ORDER BY VectorDistance(c.embedding, @v)"
         )
-        rows = self._items.query_items(query, parameters=params)
-        return [Candidate(_item(row), "vector", float(row["score"])) async for row in rows]
+        # With a collection the query is single-partition (collection is the
+        # partition key). Without one it fans out across physical partitions,
+        # each of which returns TOP k, so trim and dedupe client-side.
+        rows = self._items.query_items(
+            query, parameters=params, partition_key=collection if collection else None
+        )
+        out: list[Candidate] = []
+        seen: set[str] = set()
+        async for row in rows:
+            if row["item_id"] in seen:
+                continue
+            seen.add(row["item_id"])
+            out.append(Candidate(_item(row), "vector", float(row["score"])))
+        out.sort(key=lambda c: c.score)  # VectorDistance: smaller is closer
+        return out[:limit]
 
     async def count(self) -> int:
         rows = self._items.query_items("SELECT VALUE COUNT(1) FROM c WHERE c.kind = 'item'")

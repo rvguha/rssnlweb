@@ -92,9 +92,10 @@ class OpenRouter:
             ],
             response_format={"type": "json_object"},
             temperature=0,
-            # Reasoning models spend max_tokens on thinking first; a tight cap
-            # returns empty content. Keep effort low and the cap generous.
-            max_tokens=4000,
+            # Reasoning models spend max_tokens on thinking first, so effort is
+            # low; the cap bounds the damage when a model degenerates into
+            # thousands of lines of broken JSON (seen with gpt-oss-20b).
+            max_tokens=1500,
             extra_body={
                 "reasoning": {"effort": "low"},
                 **({"provider": {"sort": self.provider_sort}} if self.provider_sort else {}),
@@ -103,7 +104,14 @@ class OpenRouter:
         content = response.choices[0].message.content
         if not content:
             raise RuntimeError("ranking model returned an empty response")
-        result = json.loads(content)
+        try:
+            result = json.loads(content)
+        except json.JSONDecodeError as exc:
+            head = content[:160].replace("\n", "\\n")
+            raise ValueError(
+                f"ranking model returned malformed JSON ({len(content)} chars, "
+                f"finish={response.choices[0].finish_reason}): {head!r}"
+            ) from exc
         if isinstance(result, list) and len(result) == 1 and isinstance(result[0], dict):
             result = result[0]
         if not isinstance(result, dict):

@@ -8,6 +8,7 @@ into a 503 rather than an empty feed that looks like "nothing new".
 from __future__ import annotations
 
 import asyncio
+import logging
 from typing import Any
 
 from .models import Candidate, Match
@@ -25,6 +26,7 @@ INSTRUCTION = (
 )
 
 CATEGORIES = ("strong", "relevant")
+logger = logging.getLogger(__name__)
 
 
 class RankingError(RuntimeError):
@@ -56,7 +58,13 @@ async def _classify_batch(query: str, batch: list[Candidate], ranker: Ranker) ->
             for i, c in enumerate(batch)
         ],
     }
-    output = await ranker.structured(INSTRUCTION, payload)
+    # One retry: a model occasionally returns truncated or malformed JSON, and a
+    # second call almost always succeeds. A second failure surfaces as a 503.
+    try:
+        output = await ranker.structured(INSTRUCTION, payload)
+    except Exception as first:
+        logger.warning("ranking batch failed once (%s: %s); retrying", type(first).__name__, str(first)[:120])
+        output = await ranker.structured(INSTRUCTION, payload)
     items: Any = output.get("results", [])
     if not isinstance(items, list):
         raise RankingError("ranker returned no results list")

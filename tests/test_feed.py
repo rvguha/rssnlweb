@@ -135,3 +135,17 @@ async def test_collection_mask(store: Store):
     assert await ids(None) == ["ai_show:a1", "gone:x1", "hist_show:h1"]
     req = FeedRequest("rust", since=None, limit=10, threshold="relevant", collection="ai")
     assert b"collection=ai" in render_rss(req, [], "http://h")
+
+
+async def test_ranker_retries_once():
+    calls = []
+
+    class Flaky:
+        async def structured(self, instruction, payload):
+            calls.append(1)
+            if len(calls) == 1:
+                raise ValueError("malformed json")
+            return {"results": [{"i": 0, "m": "strong", "why": "second try"}]}
+
+    matches = await classify("q", [Candidate(make_item("1", "t"), "vector", 1.0)], Flaky())
+    assert len(calls) == 2 and matches[0].why == "second try"
