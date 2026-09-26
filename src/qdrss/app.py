@@ -4,6 +4,8 @@ import asyncio
 import contextlib
 import hashlib
 import logging
+import re
+import sys
 import time
 from datetime import UTC, datetime
 from pathlib import Path
@@ -126,10 +128,42 @@ class Services:
         self._counts_cache = (time.monotonic(), out)
         return out
 
+    async def refresh_in_subprocess(self) -> None:
+        """Cosmos mode: run `qdrss-ingest` as a child process.
+
+        Fetching and parsing 300 feeds (some 50 MB) and embedding what is new is
+        CPU-bound work that would stall the event loop on a small instance; in
+        its own interpreter it only competes for the core.
+        """
+        proc = await asyncio.create_subprocess_exec(
+            sys.executable, "-c", "from qdrss.app import ingest_main; ingest_main()",
+            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT,
+        )
+        summary: dict = {"at": datetime.now(UTC).isoformat(), "new_items": None, "errors": {}}
+        assert proc.stdout is not None
+        async for raw in proc.stdout:
+            line = raw.decode(errors="replace").rstrip()
+            if m := re.match(r"new items: (\d+); errors: (\d+)", line):
+                summary["new_items"] = int(m.group(1))
+            elif line.startswith("  ") and ": " in line and summary["new_items"] is not None:
+                name, _, err = line.strip().partition(": ")
+                summary["errors"][name] = err
+            elif "HTTP Request" not in line:
+                logger.info("ingest: %s", line[:200])
+        code = await proc.wait()
+        if code != 0:
+            summary["errors"]["_process"] = f"exit {code}"
+        self.last_refresh = summary
+        self._counts_cache = None
+        self._feeds.clear()
+
     async def _loop(self) -> None:
         while True:
             try:
-                await self.refresh_once()
+                if self.cosmos:
+                    await self.refresh_in_subprocess()
+                else:
+                    await self.refresh_once()
             except Exception:
                 logger.exception("refresh failed")
             await asyncio.sleep(self.config.refresh_minutes * 60)

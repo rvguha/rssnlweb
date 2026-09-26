@@ -121,8 +121,10 @@ async def _fetch_one(
 
     # Parse before touching the store: a malformed body must not update validators,
     # or the next fetch would 304 and we would never see a corrected feed.
+    # Parsing a 50 MB feed is seconds of CPU; keep it off the event loop so
+    # feed fetches being served meanwhile are not stalled.
     try:
-        items = _tag(parse_feed(body, source.name, datetime.now(UTC)), source)
+        items = _tag(await asyncio.to_thread(parse_feed, body, source.name, datetime.now(UTC)), source)
     except FeedError as exc:
         return await _failed(store, source, str(exc))
 
@@ -157,7 +159,10 @@ async def _archive(
         if response.status_code != 200 or not response.content.strip():
             break
         try:
-            items = _tag(parse_feed(response.content, source.name, datetime.now(UTC)), source)
+            items = _tag(
+                await asyncio.to_thread(parse_feed, response.content, source.name, datetime.now(UTC)),
+                source,
+            )
         except FeedError as exc:
             logger.warning("%s: archive page %s: %s", source.name, url, exc)
             break
