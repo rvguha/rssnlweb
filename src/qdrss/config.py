@@ -49,7 +49,7 @@ def load_config() -> Config:
         default_limit=int(env.get("QDRSS_DEFAULT_LIMIT", "20")),
         max_limit=int(env.get("QDRSS_MAX_LIMIT", "100")),
         batch_size=int(env.get("QDRSS_RANKING_BATCH_SIZE", "5")),
-        fetch_concurrency=int(env.get("QDRSS_FETCH_CONCURRENCY", "6")),
+        fetch_concurrency=int(env.get("QDRSS_FETCH_CONCURRENCY", "4")),
         openrouter_key=env.get("OPENROUTER_API_KEY", ""),
         openrouter_base_url=env.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1"),
         ranking_model=env.get("OPENROUTER_RANKING_MODEL", "openai/gpt-oss-20b"),

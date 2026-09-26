@@ -98,7 +98,7 @@ async def _fetch_one(
 
     async with limit:
         try:
-            response = await client.get(source.url, headers=headers)
+            response = await _get_with_retry(client, source.url, headers)
         except httpx.HTTPError as exc:
             return await _failed(store, source, f"{type(exc).__name__}: {exc}")
 
@@ -171,6 +171,18 @@ async def _archive(
     if seen:
         logger.info("%s: %d archive pages, %d items", source.name, len(seen), inserted)
     return inserted
+
+
+async def _get_with_retry(
+    client: httpx.AsyncClient, url: str, headers: dict[str, str]
+) -> httpx.Response:
+    """One retry on transport errors: hosts drop connections under a burst of
+    fetches, and App Service instances have a small outbound port budget."""
+    try:
+        return await client.get(url, headers=headers)
+    except httpx.TransportError:
+        await asyncio.sleep(3)
+        return await client.get(url, headers=headers)
 
 
 async def _failed(store: Store, source: Source, error: str) -> Outcome:
