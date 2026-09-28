@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Query Defined RSS: a natural-language query is a feed over a corpus of upstream feeds"
 readme = "README.md"
 requires-python = ">=3.11"
-license = "MIT"
+license = "GPL-3.0-or-later"
 dependencies = [
   "aiohttp>=3.9,<4",
   "azure-cosmos>=4.9,<5",
