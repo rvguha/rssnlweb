@@ -29,7 +29,21 @@ DIMENSIONS = 1536
 SNIPPET_CHARS = 1500  # what the ranker sees
 CONTENT_CHARS = 8000  # what gets embedded
 SOURCES_PK = "_sources"  # partition holding fetch validators, never a real collection
-WRITE_CONCURRENCY = 24
+WRITE_CONCURRENCY = 8
+
+
+async def _write(op, *args, **kwargs):
+    """Run one Cosmos write, honouring 429 retry-after. The SDK's own retries
+    give up under a sustained burst; a refresh must not die on a throttle."""
+    for attempt in range(40):
+        try:
+            return await op(*args, **kwargs)
+        except exceptions.CosmosHttpResponseError as exc:
+            if exc.status_code != 429:
+                raise
+            wait = float((exc.headers or {}).get("x-ms-retry-after-ms", 1000)) / 1000
+            await asyncio.sleep(min(max(wait, 0.5) * (1 + attempt / 4), 30))
+    raise RuntimeError("Cosmos kept throttling for 40 attempts")
 
 VECTOR_POLICY = {
     "vectorEmbeddings": [
@@ -98,7 +112,7 @@ class CosmosStore:
         async def create(item: Item) -> int:
             async with sem:
                 try:
-                    await self._items.create_item(_document(item))
+                    await _write(self._items.create_item, _document(item))
                     return 1
                 except exceptions.CosmosResourceExistsError:
                     return 0
@@ -128,7 +142,8 @@ class CosmosStore:
                 return
             async with sem:
                 try:
-                    await self._items.patch_item(
+                    await _write(
+                        self._items.patch_item,
                         doc_id(item_id),
                         partition_key=pk,
                         patch_operations=[
@@ -230,7 +245,8 @@ class CosmosStore:
         error: str | None = None,
     ) -> None:
         previous = await self.source_state(name)
-        await self._sources.upsert_item(
+        await _write(
+            self._sources.upsert_item,
             {
                 "id": f"source:{name}",
                 "kind": "source",
