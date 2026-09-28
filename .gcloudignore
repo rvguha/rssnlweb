@@ -1,0 +1,15 @@
+# Files Cloud Build does not need to build the image.
+.git
+.gitignore
+.venv/
+__pycache__/
+*.pyc
+data/
+build/
+tests/
+.pytest_cache/
+*.egg-info/
+.env
+.gcloudignore
+AGENTS.md
+CLAUDE.md
