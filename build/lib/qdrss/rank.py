@@ -62,7 +62,7 @@ async def _classify_batch(query: str, batch: list[Candidate], ranker: Ranker) ->
     # second call almost always succeeds. A second failure surfaces as a 503.
     try:
         output = await ranker.structured(INSTRUCTION, payload)
-    except Exception as first:  # noqa: BLE001 - any provider failure gets one retry
+    except Exception as first:
         logger.warning("ranking batch failed once (%s: %s); retrying", type(first).__name__, str(first)[:120])
         output = await ranker.structured(INSTRUCTION, payload)
     items: Any = output.get("results", [])

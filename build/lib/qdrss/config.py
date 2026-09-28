@@ -43,7 +43,7 @@ def load_config() -> Config:
         sources_path=Path(env.get("QDRSS_SOURCES", "sources.yaml")),
         host=env.get("QDRSS_HOST", "127.0.0.1"),
         port=int(env.get("QDRSS_PORT", "8000")),
-        refresh_minutes=int(env.get("QDRSS_REFRESH_MINUTES", "1440")),
+        refresh_minutes=int(env.get("QDRSS_REFRESH_MINUTES", "60")),
         window_days=int(env.get("QDRSS_WINDOW_DAYS", "7")),
         candidate_count=int(env.get("QDRSS_CANDIDATE_COUNT", "40")),
         default_limit=int(env.get("QDRSS_DEFAULT_LIMIT", "20")),

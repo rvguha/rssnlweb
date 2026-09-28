@@ -1,0 +1,291 @@
+"""Azure Cosmos DB for NoSQL as the item + vector store.
+
+One container, `items`, partitioned by collection, holds each episode with its
+embedding; Cosmos's DiskANN index answers the nearest-neighbour query with the
+date and collection filters applied inside the query. Source fetch validators
+live in the same container under the reserved partition `_sources`: a vector
+index needs dedicated container throughput, and one container at the free
+tier's 1000 RU/s costs nothing while a second would. The web app keeps nothing
+in memory.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import hashlib
+import logging
+from datetime import UTC, datetime
+from typing import Any
+
+import numpy as np
+from azure.cosmos import PartitionKey, exceptions
+from azure.cosmos.aio import CosmosClient
+
+from .models import Candidate, Item
+
+logger = logging.getLogger(__name__)
+
+DIMENSIONS = 1536
+SNIPPET_CHARS = 1500  # what the ranker sees
+CONTENT_CHARS = 8000  # what gets embedded
+SOURCES_PK = "_sources"  # partition holding fetch validators, never a real collection
+WRITE_CONCURRENCY = 24
+
+VECTOR_POLICY = {
+    "vectorEmbeddings": [
+        {
+            "path": "/embedding",
+            "dataType": "float32",
+            "distanceFunction": "cosine",
+            "dimensions": DIMENSIONS,
+        }
+    ]
+}
+INDEXING_POLICY = {
+    "indexingMode": "consistent",
+    "includedPaths": [{"path": "/*"}],
+    # The vector must be excluded from the ordinary index or every write pays
+    # to index 1536 numbers; it is served by the vector index below.
+    "excludedPaths": [{"path": "/embedding/*"}, {"path": "/content/?"}, {"path": '/"_etag"/?'}],
+    "vectorIndexes": [{"path": "/embedding", "type": "diskANN"}],
+}
+
+
+def doc_id(item_id: str) -> str:
+    # Item ids carry the source url, and Cosmos ids may not contain / ? # or \.
+    return hashlib.sha256(item_id.encode()).hexdigest()[:32]
+
+
+class CosmosStore:
+    def __init__(self, endpoint: str, key: str, database: str = "qdrss", throughput: int = 1000):
+        # Retry 429s patiently: the free tier is 1000 RU/s shared by the database.
+        self.client = CosmosClient(
+            endpoint, credential=key, retry_total=20, retry_backoff_max=60
+        )
+        self.database_name = database
+        self.throughput = throughput
+        self._db = None
+        self._items = None
+        self._sources = None
+
+    async def setup(self) -> None:
+        """Create database and containers if they do not exist. Idempotent."""
+        self._db = await self.client.create_database_if_not_exists(self.database_name)
+        # Dedicated throughput: Cosmos refuses a vector index on a container that
+        # shares database-level throughput.
+        self._items = await self._db.create_container_if_not_exists(
+            id="items",
+            partition_key=PartitionKey(path="/collection"),
+            indexing_policy=INDEXING_POLICY,
+            vector_embedding_policy=VECTOR_POLICY,
+            offer_throughput=self.throughput,
+        )
+        self._sources = self._items
+
+    async def close(self) -> None:
+        await self.client.close()
+
+    # --- items ---------------------------------------------------------------
+
+    async def insert_missing(self, items: list[Item]) -> int:
+        """Create documents for items not yet stored. Existing ones are untouched.
+
+        Writes run concurrently: a feed's first fetch can carry a thousand items
+        and each create is a round trip.
+        """
+        sem = asyncio.Semaphore(WRITE_CONCURRENCY)
+
+        async def create(item: Item) -> int:
+            async with sem:
+                try:
+                    await self._items.create_item(_document(item))
+                    return 1
+                except exceptions.CosmosResourceExistsError:
+                    return 0
+
+        return sum(await asyncio.gather(*(create(item) for item in items)))
+
+    async def items_without_embedding(self, limit: int = 500) -> list[Item]:
+        query = (
+            "SELECT TOP @limit * FROM c WHERE c.kind = 'item' AND NOT IS_DEFINED(c.embedding)"
+        )
+        rows = self._items.query_items(query, parameters=[{"name": "@limit", "value": limit}])
+        return [_item(row) async for row in rows]
+
+    async def save_embeddings(
+        self, model: str, vectors: dict[str, np.ndarray], collections: dict[str, str] | None = None
+    ) -> None:
+        """Attach vectors with a partial update: one round trip per item, no read.
+
+        `collections` maps item id -> partition key; without it the partition is
+        looked up first, which doubles the round trips.
+        """
+        sem = asyncio.Semaphore(WRITE_CONCURRENCY)
+
+        async def patch(item_id: str, vector: np.ndarray) -> None:
+            pk = (collections or {}).get(item_id) or await self._partition_of(item_id)
+            if pk is None:
+                return
+            async with sem:
+                try:
+                    await self._items.patch_item(
+                        doc_id(item_id),
+                        partition_key=pk,
+                        patch_operations=[
+                            {"op": "set", "path": "/embedding", "value": [float(x) for x in vector]},
+                            {"op": "set", "path": "/embedding_model", "value": model},
+                        ],
+                    )
+                except exceptions.CosmosResourceNotFoundError:
+                    return
+
+        await asyncio.gather(*(patch(i, v) for i, v in vectors.items()))
+
+    async def _partition_of(self, item_id: str) -> str | None:
+        rows = self._items.query_items(
+            "SELECT c.collection FROM c WHERE c.id = @id",
+            parameters=[{"name": "@id", "value": doc_id(item_id)}],
+        )
+        async for row in rows:
+            return row["collection"]
+        return None
+
+    async def search(
+        self,
+        vector: np.ndarray,
+        since: datetime | None,
+        collection: str | None,
+        limit: int,
+    ) -> list[Candidate]:
+        clauses = ["IS_DEFINED(c.embedding)"]
+        params: list[dict[str, Any]] = [
+            {"name": "@k", "value": limit},
+            {"name": "@v", "value": [float(x) for x in vector]},
+        ]
+        if since is not None:
+            clauses.append("c.ingested_ts > @since")
+            params.append({"name": "@since", "value": since.timestamp()})
+        if collection:
+            clauses.append("c.collection = @collection")
+            params.append({"name": "@collection", "value": collection})
+        query = (
+            "SELECT TOP @k c.item_id, c.source, c.source_title, c.url, c.title, c.snippet, "
+            "c.published_at, c.published_raw, c.ingested_at, c.collection, "
+            "VectorDistance(c.embedding, @v) AS score "
+            f"FROM c WHERE {' AND '.join(clauses)} "
+            "ORDER BY VectorDistance(c.embedding, @v)"
+        )
+        # With a collection the query is single-partition (collection is the
+        # partition key). Without one it fans out across physical partitions,
+        # each of which returns TOP k, so trim and dedupe client-side.
+        rows = self._items.query_items(
+            query, parameters=params, partition_key=collection if collection else None
+        )
+        out: list[Candidate] = []
+        seen: set[str] = set()
+        async for row in rows:
+            if row["item_id"] in seen:
+                continue
+            seen.add(row["item_id"])
+            out.append(Candidate(_item(row), "vector", float(row["score"])))
+        out.sort(key=lambda c: c.score)  # VectorDistance: smaller is closer
+        return out[:limit]
+
+    async def count(self) -> int:
+        rows = self._items.query_items("SELECT VALUE COUNT(1) FROM c WHERE c.kind = 'item'")
+        async for n in rows:
+            return int(n)
+        return 0
+
+    async def counts_by_collection(self, collections: list[str]) -> dict[str, int]:
+        # One single-partition count per collection: cross-partition queries
+        # only allow bare VALUE aggregates, and the collection is the partition key.
+        out: dict[str, int] = {}
+        for name in collections:
+            rows = self._items.query_items(
+                "SELECT VALUE COUNT(1) FROM c WHERE c.kind = 'item'", partition_key=name
+            )
+            out[name] = 0
+            async for n in rows:
+                out[name] = int(n)
+        return out
+
+    # --- sources -------------------------------------------------------------
+
+    async def source_state(self, name: str) -> dict[str, str | None]:
+        try:
+            row = await self._sources.read_item(f"source:{name}", partition_key=SOURCES_PK)
+        except exceptions.CosmosResourceNotFoundError:
+            return {}
+        return {k: row.get(k) for k in ("url", "etag", "last_modified", "sha256", "last_fetch", "last_error")}
+
+    async def remember_source(
+        self,
+        name: str,
+        url: str,
+        *,
+        etag: str | None = None,
+        last_modified: str | None = None,
+        sha256: str | None = None,
+        error: str | None = None,
+    ) -> None:
+        previous = await self.source_state(name)
+        await self._sources.upsert_item(
+            {
+                "id": f"source:{name}",
+                "kind": "source",
+                "collection": SOURCES_PK,
+                "name": name,
+                "url": url,
+                "etag": etag if error is None else previous.get("etag"),
+                "last_modified": last_modified if error is None else previous.get("last_modified"),
+                "sha256": sha256 if error is None else previous.get("sha256"),
+                "last_fetch": datetime.now(UTC).isoformat(),
+                "last_error": error,
+            }
+        )
+
+    async def all_sources(self) -> list[dict[str, str | None]]:
+        rows = self._sources.query_items(
+            "SELECT c.name, c.url, c.last_fetch, c.last_error FROM c "
+            "WHERE c.kind = 'source' ORDER BY c.name"
+        )
+        return [dict(row) async for row in rows]
+
+
+def _document(item: Item, vector: np.ndarray | None = None, model: str | None = None) -> dict:
+    doc: dict[str, Any] = {
+        "id": doc_id(item.id),
+        "kind": "item",
+        "item_id": item.id,
+        "source": item.source,
+        "source_title": item.source_title,
+        "collection": item.collection or "default",
+        "url": item.url,
+        "title": item.title,
+        "snippet": item.content[:SNIPPET_CHARS],
+        "content": item.content[:CONTENT_CHARS],
+        "published_at": item.published_at.isoformat() if item.published_at else None,
+        "published_raw": item.published_raw,
+        "ingested_at": item.ingested_at.isoformat(),
+        "ingested_ts": item.ingested_at.timestamp(),
+    }
+    if vector is not None:
+        doc["embedding"] = [float(x) for x in vector]
+        doc["embedding_model"] = model
+    return doc
+
+
+def _item(row: dict[str, Any]) -> Item:
+    return Item(
+        id=row["item_id"],
+        source=row["source"],
+        source_title=row.get("source_title", ""),
+        url=row.get("url", ""),
+        title=row.get("title", ""),
+        content=row.get("content") or row.get("snippet", ""),
+        published_at=datetime.fromisoformat(row["published_at"]) if row.get("published_at") else None,
+        published_raw=row.get("published_raw", ""),
+        ingested_at=datetime.fromisoformat(row["ingested_at"]),
+        collection=row.get("collection", ""),
+    )

@@ -918,3 +918,60 @@ soccer:
 - name: the_womens_game
   url: https://rss.art19.com/the-womens-game
   # The Women's Game — Men in Blazers; weekly
+
+nonprofit:
+- name: all_about_capital_campaigns
+  url: https://anchor.fm/s/46e7ddbc/podcast/rss
+  # from tsnlweb sources.yaml (nonprofit-sector podcasts)
+- name: i_501c_you
+  url: https://feed.podbean.com/thei501cyoupodcast/feed.xml
+  # from tsnlweb sources.yaml (nonprofit-sector podcasts)
+- name: inspired_nonprofit_leadership
+  url: https://rss.libsyn.com/shows/145931/destinations/928919.xml
+  # from tsnlweb sources.yaml (nonprofit-sector podcasts)
+- name: intentional_fundraiser
+  url: https://feeds.captivate.fm/the-intentional-fundraiser/
+  # from tsnlweb sources.yaml (nonprofit-sector podcasts)
+- name: missions_to_movements
+  url: https://rss.buzzsprout.com/1927203.rss
+  # from tsnlweb sources.yaml (nonprofit-sector podcasts)
+- name: nonprofit_hub_radio
+  url: https://rss.buzzsprout.com/1786726.rss
+  # from tsnlweb sources.yaml (nonprofit-sector podcasts)
+- name: nonprofit_leadership
+  url: https://nonprofitleadershippodcast.org/feed/podcast/
+  # from tsnlweb sources.yaml (nonprofit-sector podcasts)
+- name: nonprofit_lowdown
+  url: https://anchor.fm/s/57359c4/podcast/rss
+  # from tsnlweb sources.yaml (nonprofit-sector podcasts)
+- name: nonprofit_mastermind
+  url: https://rss.buzzsprout.com/1492126.rss
+  # from tsnlweb sources.yaml (nonprofit-sector podcasts)
+- name: nonprofit_nation
+  url: https://rss.buzzsprout.com/1778536.rss
+  # from tsnlweb sources.yaml (nonprofit-sector podcasts)
+- name: practice_of_nonprofit_leadership
+  url: https://rss.buzzsprout.com/1746349.rss
+  # from tsnlweb sources.yaml (nonprofit-sector podcasts)
+- name: purpose_and_profit_club
+  url: https://rss.buzzsprout.com/2100048.rss
+  # from tsnlweb sources.yaml (nonprofit-sector podcasts)
+- name: small_nonprofit
+  url: https://rss.buzzsprout.com/208666.rss
+  # from tsnlweb sources.yaml (nonprofit-sector podcasts)
+- name: the_nonprofit_podcast
+  url: https://rss.buzzsprout.com/634618.rss
+  # from tsnlweb sources.yaml (nonprofit-sector podcasts)
+- name: the_nonprofit_show
+  url: https://rss.buzzsprout.com/1937137.rss
+  # from tsnlweb sources.yaml (nonprofit-sector podcasts)
+- name: tony_martignetti_nonprofit_radio
+  url: https://www.podcast.mpgadv.com/feed/
+  # from tsnlweb sources.yaml (nonprofit-sector podcasts)
+- name: we_are_for_good
+  url: https://rss.buzzsprout.com/1258940.rss
+  # from tsnlweb sources.yaml (nonprofit-sector podcasts)
+- name: your_path_to_nonprofit_leadership
+  url: https://rss.buzzsprout.com/711042.rss
+  # from tsnlweb sources.yaml (nonprofit-sector podcasts)
+

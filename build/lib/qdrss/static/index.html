@@ -82,7 +82,7 @@ const QD = 'https://qdrss.dev/ns';
 const tabs = document.getElementById('tabs');
 let collection = '';  // '' = every collection
 
-const LABELS = { ai: 'AI', history: 'History', finance: 'Finance', international: 'International', cricket: 'Cricket', american_football: 'American football', soccer: 'Soccer', nonprofit: 'Nonprofits' };
+const LABELS = { ai: 'AI', history: 'History', finance: 'Finance', international: 'International', cricket: 'Cricket', american_football: 'American football', soccer: 'Soccer' };
 function label(name) { return LABELS[name] || name.replace(/[-_]/g, ' '); }
 
 async function loadTabs() {
