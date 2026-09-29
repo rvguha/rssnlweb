@@ -33,17 +33,20 @@ WRITE_CONCURRENCY = 8
 
 
 async def _write(op, *args, **kwargs):
-    """Run one Cosmos write, honouring 429 retry-after. The SDK's own retries
-    give up under a sustained burst; a refresh must not die on a throttle."""
+    """Run one Cosmos write, retrying throttles and transient server errors.
+    The SDK's own retries give up under a sustained burst; a refresh must not
+    die on one bad response out of thousands."""
     for attempt in range(40):
         try:
             return await op(*args, **kwargs)
         except exceptions.CosmosHttpResponseError as exc:
-            if exc.status_code != 429:
+            # 429 throttle, plus transient server-side failures (408 timeout,
+            # 500 "request was aborted", 503) seen during long bulk runs.
+            if exc.status_code not in (408, 429, 500, 503):
                 raise
             wait = float((exc.headers or {}).get("x-ms-retry-after-ms", 1000)) / 1000
             await asyncio.sleep(min(max(wait, 0.5) * (1 + attempt / 4), 30))
-    raise RuntimeError("Cosmos kept throttling for 40 attempts")
+    raise RuntimeError("Cosmos kept failing for 40 attempts")
 
 VECTOR_POLICY = {
     "vectorEmbeddings": [
