@@ -975,3 +975,169 @@ nonprofit:
   url: https://rss.buzzsprout.com/711042.rss
   # from tsnlweb sources.yaml (nonprofit-sector podcasts)
 
+# War, strategy, war news and military technology. War on the Rocks, Ukraine: The Latest,
+# Battleground and Geopolitics Decanted are in international (a source has one collection).
+war:
+- name: cogs_of_war
+  url: https://rss.libsyn.com/shows/580325/destinations/5030860.xml
+  # Cogs of War — War on the Rocks (defense industry); biweekly
+- name: the_merge
+  url: https://anchor.fm/s/e448f9d8/podcast/rss
+  # The Merge — combat aviator veterans (military tech); monthly
+- name: mwi_podcast
+  url: https://feeds.castos.com/w480
+  # Modern War Institute — Modern War Institute at West Point; monthly
+- name: the_spear
+  url: https://feeds.castos.com/2846
+  # The Spear — Modern War Institute at West Point; biweekly
+- name: five_questions_for_a_general
+  url: https://feeds.castos.com/d28kx
+  # Five Questions for a General — Modern War Institute at West Point; biweekly
+- name: irregular_warfare_podcast
+  url: https://feed.podbean.com/IrregularWarfare/feed.xml
+  # Irregular Warfare Podcast — Irregular Warfare Initiative; biweekly
+- name: iwi_insider_short_of_war
+  url: https://feed.podbean.com/irregularwarfareinsider/feed.xml
+  # Insider: Short of War — Irregular Warfare Initiative; several/week
+- name: horns_of_a_dilemma
+  url: https://rss.libsyn.com/shows/116143/destinations/662418.xml
+  # Horns of a Dilemma — Texas National Security Review; biweekly
+- name: defense_aerospace_report
+  url: https://feeds.soundcloud.com/users/soundcloud:users:276288852/sounds.rss
+  # Defense & Aerospace Report — Vago Muradian; daily
+- name: arms_control_wonk
+  url: https://armscontrolwonk.libsyn.com/rss
+  # Arms Control Wonk — Jeffrey Lewis & Aaron Stein; monthly
+- name: silicon_curtain
+  url: https://anchor.fm/s/a2dc0f30/podcast/rss
+  # Silicon Curtain — Jonathan Fink; daily
+- name: frontline_times_radio
+  url: https://feeds.acast.com/public/shows/683f1bbef711091cf40ba4cb
+  # Frontline: The War in Ukraine and Global Security — Times Radio; daily
+- name: ukraine_without_hype
+  url: https://anchor.fm/s/3ca9dcec/podcast/rss
+  # Ukraine Without Hype — Ukraine Without Hype; biweekly
+- name: the_eastern_border
+  url: https://feeds.acast.com/public/shows/cfd8aed5-6d63-4b2f-b325-46e4b5665583
+  # The Eastern Border — Kristaps Andrejsons (Baltic security); several/week
+- name: in_moscows_shadows
+  url: https://rss.buzzsprout.com/1026985.rss
+  # In Moscow's Shadows — Mark Galeotti; weekly
+- name: angry_planet
+  url: https://feeds.acast.com/public/shows/3dd76634-7b1c-45c2-a9cf-2f6f96d4e0b4
+  # Angry Planet — Matthew Gault & Jason Fields; biweekly
+- name: popular_front
+  url: https://rss.pdrl.fm/dbf9aa/feeds.libsyn.com/118911/rss/?redirect=false
+  # POPULAR FRONT — Jake Hanrahan; weekly
+- name: school_of_war
+  url: https://feeds.megaphone.fm/school-of-war
+  # School of War — Aaron MacLean / The Free Press; several/week
+- name: state_secrets
+  url: https://rss.libsyn.com/shows/88746/destinations/436528.xml
+  # State Secrets — The Cipher Brief; weekly
+- name: sources_and_methods
+  url: https://feeds.npr.org/g-s1-84651/podcast.xml
+  # Sources & Methods — NPR national security desk; weekly
+- name: rational_security
+  url: https://feeds.acast.com/public/shows/60427f9d34b9a27f4b6e3a8d
+  # Rational Security — Lawfare Institute; weekly
+- name: shield_of_the_republic
+  url: https://api.substack.com/feed/podcast/10170614.rss
+  # Shield of the Republic — Eliot Cohen & Eric Edelman; weekly
+- name: todays_battlegrounds
+  url: https://feed.podbean.com/todaysbattlegrounds/feed.xml
+  # Today's Battlegrounds — Hoover Institution (H.R. McMaster); weekly
+- name: brussels_sprouts
+  url: https://feed.podbean.com/brusselssprouts/feed.xml
+  # Brussels Sprouts — CNAS (transatlantic security); weekly
+- name: cna_talks
+  url: https://cna.libsyn.com/rss
+  # CNA Talks — CNA; biweekly
+- name: sounds_strategic
+  url: https://feeds.acast.com/public/shows/5eb41117570358cd673a3a85
+  # Sounds Strategic — IISS; monthly
+- name: war_studies_kcl
+  url: http://feeds.feedburner.com/warstudies
+  # War Studies — King's College London, Dept of War Studies; biweekly
+- name: strategy_matters
+  url: https://feeds.captivate.fm/strategy-matters/
+  # Strategy Matters — U.S. Naval War College; weekly
+- name: conversations_on_strategy
+  url: https://feeds.blubrry.com/feeds/1464831.xml
+  # Conversations on Strategy — U.S. Army War College; biweekly
+- name: decisive_point
+  url: https://feeds.blubrry.com/feeds/1459347.xml
+  # Decisive Point — U.S. Army War College; biweekly
+- name: sea_control
+  url: https://feeds.simplecast.com/OHIsINAK
+  # Sea Control — CIMSEC; biweekly
+- name: midrats
+  url: https://www.spreaker.com/show/3270000/episodes/feed
+  # Midrats — CDR Salamander; weekly
+- name: nuclecast
+  url: https://media.rss.com/nuclecast-podcast/feed.xml
+  # NucleCast — ANWA Deterrence Center; weekly
+- name: ausa_army_matters
+  url: https://feed.podbean.com/podcast.ausa.org/feed.xml
+  # AUSA's Army Matters — Association of the U.S. Army; biweekly
+- name: behind_the_camouflage
+  url: https://www.mca-marines.org/feed/behind-the-camouflage-podcast/
+  # Behind the Camouflage — Marine Corps Association; irregular
+- name: aerospace_advantage
+  url: https://feed.podbean.com/mitchellinstituteaerospaceadvantage/feed.xml
+  # The Aerospace Advantage — Mitchell Institute for Aerospace Studies; weekly
+- name: spacepower_podcast
+  url: https://api.riverside.com/hosting/ZVGQHBao.rss
+  # Spacepower Podcast — Space Force Association; weekly
+- name: aviation_week_check_6
+  url: https://aviationweek.libsyn.com/rss
+  # Aviation Week's Check 6 — Aviation Week; several/week
+- name: breaking_defense_weekly_break_out
+  url: https://rss.libsyn.com/shows/115384/destinations/655385.xml
+  # The Weekly Break Out — Breaking Defense; weekly
+- name: defence_security_podcast_network
+  url: https://rss.libsyn.com/shows/121933/destinations/715252.xml
+  # Defence & Security Podcast Network — Defence Connect (Australia); daily
+- name: jpost_defense_and_tech
+  url: https://www.spreaker.com/show/6772154/episodes/feed
+  # The Defense and Tech Podcast — Jerusalem Post; biweekly
+- name: i_on_defense
+  url: https://rss.buzzsprout.com/1968463.rss
+  # I - On Defense — I - On Defense; several/week
+- name: fighter_pilot_podcast
+  url: https://feeds.megaphone.fm/SAHI9787219723
+  # Fighter Pilot Podcast — Tucker "Cinco" Hamilton; biweekly
+- name: click_here
+  url: https://publicfeeds.net/f/8376/clickhere
+  # Click Here — Recorded Future News (cyber conflict); several/week
+- name: the_team_house
+  url: https://www.spreaker.com/show/5960890/episodes/feed
+  # The Team House — Dee Takos (special operations); several/week
+- name: warriors_in_their_own_words
+  url: https://rss.pdrl.fm/4df880/feeds.megaphone.fm/warriorsintheirownwords
+  # Warriors In Their Own Words — Evergreen Podcasts; biweekly
+- name: we_have_ways
+  url: https://feeds.megaphone.fm/GLT8434431415
+  # We Have Ways of Making You Talk — James Holland & Al Murray / Goalhanger; several/week
+- name: ww2_podcast
+  url: https://rss.libsyn.com/shows/65366/destinations/260446.xml
+  # The WW2 Podcast — Angus Wallace; weekly
+- name: history_of_wwii_podcast
+  url: https://rss.pdrl.fm/eb4bb2/feeds.megaphone.fm/history-of-world-war-ii
+  # The History of WWII Podcast — Ray Harris Jr; several/week
+- name: unauthorized_history_pacific_war
+  url: https://feeds.simplecast.com/SacR7vrI
+  # The Unauthorized History of the Pacific War — Seth Paridon & William Toti; weekly
+- name: battles_of_the_first_world_war
+  url: https://rss.pdrl.fm/c17ca3/feeds.libsyn.com/82713/rss/?redirect=false
+  # Battles of the First World War — Mike Cunha; biweekly
+- name: the_old_front_line
+  url: https://rss.buzzsprout.com/942766.rss
+  # The Old Front Line — Paul Reed (WWI); weekly
+- name: napoleonic_wars_podcast
+  url: https://anchor.fm/s/f67a8130/podcast/rss
+  # The Napoleonic Wars Podcast — Zack White; weekly
+- name: forgotten_war_burma
+  url: https://feeds.acast.com/public/shows/677458a3499663105ecd6d69
+  # The Forgotten War Podcast: Burma Campaign — Robert Lyman & Jack Bowsher; weekly
+
