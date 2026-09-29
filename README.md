@@ -67,10 +67,10 @@ OpenRouter, so check their catalogue before switching.
 
 **Cost.** A feed fetch is one embedding call (cached per query) plus
 `candidate_count / batch_size` ranking calls (8 by default). With gpt-oss-20b that is
-about 0.2 cents per fetch, so **1,000 fetches cost about $2**. Every fetch pays that:
-the rendered feed is not cached, so a reader polling a URL hourly costs ~$1.40 a month
-on its own, and 100 readers on the same URL cost 100x. Only the query's embedding is
-cached. The corpus embedding is a one-time cost per model.
+about 0.2 cents per uncached fetch, so **1,000 uncached fetches cost about $2**.
+Rendered feeds are cached per (query, collection, limit) until the next refresh and
+served with an ETag, so repeat polls of the same URL cost nothing and readers that
+send `If-None-Match` get a 304. The corpus embedding is a one-time cost per model.
 
 ## How a fetch works
 
@@ -110,11 +110,12 @@ Two modes behind one interface, chosen by whether `COSMOS_ENDPOINT` is set.
 
 - **Cosmos DB for NoSQL** (production): one `items` container partitioned by
   collection holds each episode with its embedding; the feed's nearest-neighbour
-  query runs in Cosmos with the date and collection filters, over a DiskANN index.
+  query runs in Cosmos with the date and collection filters, over a `quantizedFlat`
+  vector index (DiskANN's filtered recall was poor at this size).
   The web process holds nothing. The free tier (1000 RU/s, 25 GB) covers tens of
   thousands of episodes. `qdrss-ingest` fetches feeds, stores new items and embeds
   them; run it on a schedule anywhere with the same `.env`, or leave
-  `QDRSS_INGEST_IN_APP=true` and the web app runs it hourly itself.
+  `QDRSS_INGEST_IN_APP=true` and the web app runs it daily itself, as a subprocess.
   `scripts/migrate_sqlite_to_cosmos.py` loads an existing SQLite corpus, vectors
   included, without re-embedding.
 - **SQLite** (default, tests, offline): items and cached vectors in one file, an
