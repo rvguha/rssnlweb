@@ -36,6 +36,9 @@
   .tabs button { background: none; border: none; border-bottom: 2px solid transparent; border-radius: 0; color: var(--muted); padding: 8px 12px; margin-bottom: -1px; }
   .tabs button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); }
   .tabs small { color: var(--muted); font-size: 12px; margin-left: 4px; }
+  #examples { display: flex; flex-wrap: wrap; gap: 6px; margin: -4px 0 4px; }
+  #examples button { background: var(--tag); color: var(--accent); border: 1px solid transparent; border-radius: 14px; padding: 4px 10px; font-size: 13px; line-height: 1.35; text-align: left; }
+  #examples button:hover, #examples button:focus-visible { border-color: var(--accent); }
 </style>
 </head>
 <body>
@@ -48,6 +51,7 @@
   <label>Query
     <input id="q" name="q" placeholder="e.g. open-source database releases with benchmarks" required autofocus>
   </label>
+  <div id="examples" aria-label="Example queries"></div>
   <div class="row">
     <label>Items per fetch
       <input id="limit" type="number" min="1" max="100" value="20">
@@ -83,6 +87,86 @@ const tabs = document.getElementById('tabs');
 let collection = '';  // '' = every collection
 
 const LABELS = { ai: 'AI', history: 'History', finance: 'Finance', international: 'International', cricket: 'Cricket', american_football: 'American football', soccer: 'Soccer', nonprofit: 'Nonprofits' };
+// Example queries per collection; each returned several matches against the live corpus.
+const EXAMPLES = {
+  '': ['How AI is changing jobs, productivity and financial markets, with evidence rather than hype',
+       "Historical parallels drawn to today's geopolitical crises and wars",
+       'The business of sport: league finances, club ownership and media rights deals'],
+  ai: ['Are scaling laws slowing down? Debates over compute, data limits and new training paradigms',
+       'Reinforcement learning, reasoning models and test-time compute explained by researchers',
+       'AI agents in production: failures, evaluation methods and cost trade-offs',
+       'Open-weight model releases compared with frontier closed models on coding and reasoning',
+       'AI regulation in the EU, US states and China and what it means for startups',
+       'Alignment research agendas, loss-of-control risks and critiques of AI doom arguments',
+       'Chip export controls, GPU supply and the energy economics of AI data centers',
+       'AI in medicine: diagnostic accuracy, clinical trials and regulatory approval',
+       'How AI coding assistants change software engineering jobs and developer productivity',
+       "China's AI labs, models and industrial policy compared with the US"],
+  history: ['Ancient Rome: emperors, civil wars and the decline of the Republic',
+            'Revolutions compared: causes and outcomes of the French, Russian and Haitian revolutions',
+            'Queens and powerful women in medieval and early modern Europe',
+            'The July Crisis of 1914 and how diplomacy failed to stop World War One',
+            'British Empire in India: the East India Company, the Raj and partition',
+            'Ancient civilizations of Egypt, Greece and Persia: rulers, wars and religion',
+            'Political scandals and corruption in American history',
+            'Spies, codebreakers and intelligence operations in World War Two'],
+  finance: ['Federal Reserve rate decisions, inflation data and how bond markets react',
+            'Index funds versus active management: fees, factor evidence and performance',
+            'Retirement portfolios: safe withdrawal rates, bonds and inflation protection',
+            'Tariffs and trade policy effects on markets, supply chains and prices',
+            'Housing affordability, mortgage rates and the outlook for home prices',
+            'Stablecoins, crypto regulation and the failures of crypto exchanges',
+            'How endowments, pensions and hedge funds allocate capital',
+            'Recession signals: yield curve, unemployment and corporate earnings'],
+  international: ['China-Taiwan tensions and US military posture in the Indo-Pacific',
+                  "Russia's war in Ukraine: frontline developments, sanctions and peace talks",
+                  'European elections and the rise of populist and far-right parties',
+                  "India's foreign policy between the US, Russia and China",
+                  'Israel, Gaza, Iran and regional diplomacy in the Middle East',
+                  'Coups in the Sahel, resource deals and great-power competition in Africa',
+                  'Trade wars and tariffs between the US, the EU and China',
+                  'Climate negotiations, climate finance and developing countries'],
+  cricket: ["England's attacking Bazball approach to Test cricket: tactics and results",
+            'Spin bowling in subcontinent conditions and how visiting batters cope',
+            'The future of Test cricket against franchise T20 leagues like the IPL',
+            'County Championship pitches, player development and selection for England',
+            'India versus Australia Test series analysis',
+            "The growth of women's cricket: the WPL, the Hundred and international series",
+            "Fast bowlers' injuries, workload management and pace attacks"],
+  american_football: ['NFL quarterback film breakdowns, MVP races and contract extensions',
+                      'Fantasy football waiver pickups and start or sit advice for running backs',
+                      'NFL Draft scouting reports on quarterbacks and edge rushers',
+                      'College football playoff expansion, conference realignment and NIL money',
+                      'Defensive coordinators, pass rush and coverage schemes that stop elite quarterbacks',
+                      'Offensive play-calling: Shanahan, McVay and the modern NFL run game',
+                      'Head coach hirings and firings and front office roster decisions',
+                      'Injury news and how it changes betting lines and fantasy value'],
+  soccer: ['Premier League title race: how the top teams play and their key matchups',
+           'Transfer window deals and rumours for the biggest European clubs',
+           'Champions League knockout ties and European club competition',
+           "Women's football: the WSL, the NWSL and the Women's Champions League",
+           'Football finance: club ownership, profit and sustainability rules and breakaway leagues',
+           'Managers under pressure and how clubs rebuild their squads',
+           'Young talents and academy players breaking through at top European clubs'],
+  nonprofit: ['Major gift fundraising: donor cultivation, the ask and stewardship',
+              'Capital campaigns: feasibility studies, lead gifts and campaign planning',
+              'Nonprofit board governance, recruiting board members and working with the executive director',
+              'Grant writing and building relationships with foundations',
+              'Burnout, staff retention and healthy culture in nonprofit teams',
+              'Using AI and technology to run a small nonprofit',
+              'Measuring impact and reporting outcomes to donors'],
+};
+const examples = document.getElementById('examples');
+
+function showExamples(name) {
+  examples.replaceChildren(...(EXAMPLES[name] || []).map(q => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = q;
+    b.addEventListener('click', () => { document.getElementById('q').value = q; form.requestSubmit(); });
+    return b;
+  }));
+}
+
 function label(name) { return LABELS[name] || name.replace(/[-_]/g, ' '); }
 
 async function loadTabs() {
@@ -106,6 +190,7 @@ async function loadTabs() {
 function selectTab(name) {
   collection = name;
   for (const b of tabs.querySelectorAll('button')) b.setAttribute('aria-selected', b.dataset.collection === name);
+  showExamples(name);
 }
 
 function feedUrl() {
@@ -173,6 +258,7 @@ document.getElementById('copy').addEventListener('click', async () => {
 // A shared link like /?q=... rebuilds the same feed.
 const initial = new URLSearchParams(location.search);
 collection = initial.get('collection') || '';
+showExamples(collection);
 loadTabs();
 if (initial.get('q')) {
   document.getElementById('q').value = initial.get('q');
