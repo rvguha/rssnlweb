@@ -17,6 +17,8 @@
   label { display: grid; gap: 4px; font-size: 14px; color: var(--muted); }
   input, select { font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; width: 100%; }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  label.check { display: flex; align-items: center; gap: 8px; align-self: end; padding-bottom: 10px; color: var(--text, inherit); cursor: pointer; }
+  label.check input { width: auto; margin: 0; }
   button { font: inherit; padding: 8px 14px; border-radius: 6px; border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; }
   button.ghost { background: transparent; color: var(--accent); }
   #url { margin-top: 24px; display: none; }
@@ -55,6 +57,9 @@
   <div class="row">
     <label>Items per fetch
       <input id="limit" type="number" min="1" max="100" value="20">
+    </label>
+    <label class="check" title="Search every stored episode, not only what arrived this week">
+      <input id="archive" type="checkbox"> Include archive
     </label>
   </div>
   <div><button type="submit">Create feed</button></div>
@@ -205,12 +210,17 @@ function selectTab(name) {
   showExamples(name);
 }
 
+const ARCHIVE_SINCE = '2000-01-01';
+
 function feedUrl() {
   const p = new URLSearchParams();
   p.set('q', document.getElementById('q').value.trim());
   if (collection) p.set('collection', collection);
   const limit = parseInt(document.getElementById('limit').value, 10);
   if (limit && limit !== 20) p.set('limit', String(limit));
+  // Feeds hold what was ingested within the window; archived episodes are stamped
+  // with their publication date, so searching them means a far-back since.
+  if (document.getElementById('archive').checked) p.set('since', ARCHIVE_SINCE);
   return `${location.origin}/feed.xml?${p}`;
 }
 
@@ -275,6 +285,7 @@ loadTabs();
 if (initial.get('q')) {
   document.getElementById('q').value = initial.get('q');
   if (initial.get('limit')) document.getElementById('limit').value = initial.get('limit');
+  if (initial.get('since')) document.getElementById('archive').checked = true;
   form.requestSubmit();
 }
 </script>
