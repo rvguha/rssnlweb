@@ -31,9 +31,6 @@ ai:
 - name: gradient_dissent
   url: https://feeds.captivate.fm/gradient-dissent/
   # Gradient Dissent — Lukas Biewald (Weights & Biases); monthly
-- name: hard_fork
-  url: https://feeds.simplecast.com/6HKOhNgS
-  # Hard Fork — NYT / Kevin Roose & Casey Newton; weekly
 - name: eye_on_ai
   url: https://rss.libsyn.com/shows/123267/destinations/727317.xml
   # Eye On A.I. — Craig S. Smith; weekly
@@ -1141,3 +1138,226 @@ war:
   url: https://feeds.acast.com/public/shows/677458a3499663105ecd6d69
   # The Forgotten War Podcast: Burma Campaign — Robert Lyman & Jack Bowsher; weekly
 
+nytimes:
+# Every New York Times podcast feed Apple lists under The New York Times, NYT Opinion,
+# NYT Magazine and Serial Productions (2026-10-02; The Athletic's 91 sports shows excluded),
+# newest first. Current NYT feeds carry only recent episodes; archives are what RSS gives.
+- name: nyt_the_ezra_klein_show
+  url: https://feeds.simplecast.com/kEKXbjuJ
+  # The Ezra Klein Show — New York Times Opinion; latest 2026-10-02
+- name: nyt_the_daily
+  url: https://feeds.simplecast.com/Sl5CSM3S
+  # The Daily — The New York Times; latest 2026-10-02
+- name: nyt_the_headlines
+  url: https://feeds.simplecast.com/ydACIPHO
+  # The Headlines — The New York Times; latest 2026-10-02
+- name: nyt_the_book_review
+  url: https://feeds.simplecast.com/zyaxg_KL
+  # The Book Review — The New York Times; latest 2026-10-02
+- name: nyt_the_wirecutter_show
+  url: https://feeds.simplecast.com/tI57z_LN
+  # The Wirecutter Show — The New York Times; latest 2026-10-02
+- name: nyt_popcast
+  url: https://feeds.simplecast.com/TzbxCT1l
+  # Popcast — The New York Times; latest 2026-10-02
+- name: hard_fork
+  url: https://feeds.simplecast.com/6HKOhNgS
+  # Hard Fork — NYT / Kevin Roose & Casey Newton; weekly (moved from ai, 2026-10-02)
+- name: nyt_interesting_times
+  url: https://feeds.simplecast.com/bS1LZG8m
+  # Interesting Times — New York Times Opinion; latest 2026-10-01
+- name: nyt_the_opinions
+  url: https://feeds.simplecast.com/kphrlDnb
+  # The Opinions — The New York Times Opinion; latest 2026-09-30
+- name: nyt_modern_love
+  url: https://feeds.simplecast.com/eHEJ08b1
+  # Modern Love — The New York Times; latest 2026-09-30
+- name: nyt_the_interview
+  url: https://feeds.simplecast.com/HpGMoS4g
+  # The Interview — The New York Times; latest 2026-09-26
+- name: nyt_cannonball_with_wesley_morris
+  url: https://feeds.simplecast.com/XguOuIhG
+  # Cannonball with Wesley Morris — The New York Times; latest 2026-09-25
+- name: nyt_serial
+  url: https://feeds.simplecast.com/PpzWFGhg
+  # Serial — Serial Productions & The New York Times; latest 2026-06-18
+- name: nyt_the_last_12_weeks
+  url: https://feeds.simplecast.com/fho8oyc2
+  # The Last 12 Weeks — Serial Productions & The New York Times; latest 2026-06-18
+- name: nyt_the_idiot
+  url: https://feeds.simplecast.com/KrIt3mGT
+  # The Idiot — Serial Productions & The New York Times; latest 2026-04-16
+- name: nyt_dealbook_summit
+  url: https://feeds.simplecast.com/HZtr0HV5
+  # DealBook Summit — The New York Times; latest 2025-12-08
+- name: nyt_the_preventionist
+  url: https://feeds.simplecast.com/LLSr9Aur
+  # The Preventionist — Serial Productions & The New York Times; latest 2025-10-30
+- name: nyt_climate_forward_podcast
+  url: https://feeds.simplecast.com/lfKHYddi
+  # Climate Forward Podcast — The New York Times; latest 2025-10-03
+- name: nyt_the_retrievals
+  url: https://feeds.simplecast.com/SD1pPTeV
+  # The Retrievals — Serial Productions & The New York Times; latest 2025-07-10
+- name: nyt_still_processing
+  url: https://feeds.simplecast.com/YXhATe6k
+  # Still Processing — The New York Times; latest 2025-06-25
+- name: nyt_the_protocol
+  url: https://feeds.simplecast.com/CnNx__EM
+  # The Protocol — The New York Times; latest 2025-06-05
+- name: nyt_the_new_york_times_narrated
+  url: https://feeds.simplecast.com/WHvRQ7B1
+  # The New York Times Narrated — The New York Times; latest 2025-03-19
+- name: nyt_matter_of_opinion
+  url: https://feeds.simplecast.com/vuQ8taIP
+  # Matter of Opinion — New York Times Opinion; latest 2025-02-28
+- name: nyt_the_run_up
+  url: https://feeds.simplecast.com/if2_udHa
+  # The Run-Up — The New York Times; latest 2024-11-21
+- name: nyt_the_good_whale
+  url: https://feeds.simplecast.com/d6hpUM18
+  # The Good Whale — Serial Productions and the New York Times; latest 2024-11-14
+- name: nyt_the_run_up_guide_to_2024
+  url: https://feeds.simplecast.com/EF1HR_dT
+  # The Run-Up Guide to 2024 — The New York Times; latest 2024-10-10
+- name: nyt_the_deserter_an_epic_story_of_love_and_war
+  url: https://feeds.simplecast.com/NYQWn6Fq
+  # The Deserter: An Epic Story of Love and War — The New York Times; latest 2024-09-20
+- name: nyt_the_trojan_horse_affair
+  url: https://feeds.simplecast.com/I49hamKd
+  # The Trojan Horse Affair — Serial Productions & The New York Times; latest 2024-09-16
+- name: nyt_s_town
+  url: https://feeds.simplecast.com/P0BiJiki
+  # S-Town — Serial Productions; latest 2024-09-16
+- name: nyt_animal
+  url: https://feeds.simplecast.com/bV6WTCyL
+  # Animal — The New York Times; latest 2024-05-30
+- name: nyt_the_kids_of_rutherford_county
+  url: https://feeds.simplecast.com/Kr7O_C5R
+  # The Kids of Rutherford County — Serial Productions & The New York Times; latest 2023-10-26
+- name: nyt_the_coldest_case_in_laramie
+  url: https://feeds.simplecast.com/CFTd6gi_
+  # The Coldest Case In Laramie — Serial Productions & The New York Times; latest 2023-02-23
+- name: nyt_the_argument
+  url: https://feeds.simplecast.com/p5iAFWNi
+  # The Argument — New York Times Opinion; latest 2022-12-14
+- name: nyt_we_were_three
+  url: https://feeds.simplecast.com/_8GV2kbp
+  # We Were Three — Serial Productions & The New York Times; latest 2022-10-13
+- name: nyt_sway
+  url: https://feeds.simplecast.com/TXRkbiEr
+  # Sway — New York Times Opinion; latest 2022-07-28
+- name: nyt_first_person
+  url: https://feeds.simplecast.com/1KqFf3jt
+  # First Person — The New York Times; latest 2022-06-16
+- name: nyt_nice_white_parents
+  url: https://feeds.simplecast.com/B07_EAQq
+  # Nice White Parents — Serial Productions & The New York Times; latest 2022-02-25
+- name: nyt_the_improvement_association
+  url: https://feeds.simplecast.com/3JZKAtW8
+  # The Improvement Association — Serial Productions & The New York Times; latest 2022-02-18
+- name: nyt_day_x
+  url: https://feeds.simplecast.com/RKHxprL_
+  # Day X — The New York Times; latest 2021-06-03
+- name: nyt_odessa
+  url: https://feeds.simplecast.com/_WtxOmFs
+  # Odessa — The New York Times; latest 2021-03-12
+- name: nyt_rabbit_hole
+  url: https://feeds.simplecast.com/rRMR9QHI
+  # Rabbit Hole — The New York Times; latest 2020-04-23
+- name: nyt_together_apart
+  url: https://feeds.simplecast.com/L_KpxPNc
+  # Together Apart — The New York Times; latest 2020-04-15
+- name: nyt_sugar_calling
+  url: https://feeds.simplecast.com/HsZEiOJw
+  # Sugar Calling — The New York Times; latest 2020-04-08
+- name: nyt_the_field
+  url: https://feeds.simplecast.com/F1q0__jZ
+  # The Field — The New York Times; latest 2020-02-03
+- name: nyt_the_choice
+  url: https://feeds.simplecast.com/KDLNpged
+  # The Choice — New York Times Opinion; latest 2020-01-20
+- name: nyt_jungle_prince
+  url: https://feeds.simplecast.com/RCWrSQj0
+  # Jungle Prince — The New York Times; latest 2019-12-23
+- name: nyt_the_candidates
+  url: https://feeds.simplecast.com/43mwYlnd
+  # The Candidates — The New York Times; latest 2019-12-12
+- name: nyt_the_latest
+  url: https://feeds.simplecast.com/h3B4DmZM
+  # The Latest — The New York Times; latest 2019-11-14
+- name: nyt_1619
+  url: https://feeds.simplecast.com/M4uRd8jQ
+  # 1619 — The New York Times; latest 2019-08-31
+- name: nyt_charm_city
+  url: https://feeds.simplecast.com/ZDzhblEj
+  # Charm City — The New York Times; latest 2018-06-08
+- name: nyt_caliphate
+  url: https://feeds.simplecast.com/Kaj9iZFl
+  # Caliphate — The New York Times; latest 2018-04-19
+- name: nyt_change_agent
+  url: https://feeds.simplecast.com/l_5ad_l7
+  # Change Agent — The New York Times; latest 2018-03-01
+- name: nyt_inside_the_times
+  url: https://feeds.simplecast.com/y9mxFH3j
+  # Inside The Times — The New York Times; latest 2017-09-12
+- name: nyt_the_new_washington
+  url: https://feeds.simplecast.com/0UflcezM
+  # The New Washington — The New York Times; latest 2017-08-12
+- name: nyt_the_ep_13_songs_that_capture_our_moment
+  url: https://audio-rss.nytimes.com/v1/rss/85c7d57f-1628-4989-a367-a985cfefa501
+  # The EP: 13 Songs That Capture Our Moment — The New York Times; latest 2017-03-09
+- name: nyt_the_run_up_2016
+  url: https://feeds.simplecast.com/59dch__o
+  # The Run-Up (2016) — The New York Times; latest 2017-02-03
+- name: nyt_timestalks
+  url: https://podcasts.nytimes.com/services/xml/rss/nyt/podcasts/timestalks.xml
+  # TimesTalks — The New York Times; latest 2016-03-24
+- name: nyt_the_ethicists
+  url: https://feeds.megaphone.fm/PP9881967635
+  # The Ethicists — The New York Times Magazine; latest 2015-09-17
+- name: nyt_science_times
+  url: https://podcasts.nytimes.com/services/xml/rss/nyt/podcasts/scienceupdate.xml
+  # Science Times — The New York Times; latest 2015-04-07
+- name: nyt_front_page
+  url: https://podcasts.nytimes.com/services/xml/rss/nyt/podcasts/frontpage.xml
+  # Front Page — The New York Times; latest 2012-03-30
+- name: nyt_bits_tech_talk
+  url: https://podcasts.nytimes.com/services/xml/rss/nyt/podcasts/techtalk.xml
+  # Bits: Tech Talk — The New York Times; latest 2011-12-29
+- name: nyt_weekend_business
+  url: https://podcasts.nytimes.com/services/xml/rss/nyt/podcasts/weekendbiz.xml
+  # Weekend Business — The New York Times; latest 2011-12-23
+- name: nyt_washington_report
+  url: https://podcasts.nytimes.com/services/xml/rss/nyt/podcasts/washreport.xml
+  # Washington Report — The New York Times; latest 2011-12-05
+- name: nyt_around_broadway
+  url: https://podcasts.nytimes.com/services/xml/rss/nyt/podcasts/aroundbroadway.xml
+  # Around Broadway — The New York Times; latest 2011-11-23
+- name: nyt_backstory
+  url: https://podcasts.nytimes.com/services/xml/rss/nyt/podcasts/backstory.xml
+  # Backstory — The New York Times; latest 2011-03-01
+- name: nyt_the_ethicist
+  url: https://podcasts.nytimes.com/services/xml/rss/nyt/podcasts/cohen.xml
+  # The Ethicist — The New York Times; latest 2011-02-25
+- name: nyt_weekend_explorer
+  url: https://podcasts.nytimes.com/services/xml/rss/nyt/podcasts/weekendexplorer.xml
+  # Weekend Explorer — The New York Times; latest 2009-12-01
+- name: nyt_only_in_new_york
+  url: https://podcasts.nytimes.com/services/xml/rss/nyt/podcasts/onlyinnewyork.xml
+  # Only in New York — The New York Times; latest 2009-04-23
+- name: nyt_best_of_well
+  url: https://podcasts.nytimes.com/services/xml/rss/nyt/podcasts/well.xml
+  # Best of Well — The New York Times; latest 2008-12-11
+- name: nyt_health_update
+  url: https://podcasts.nytimes.com/services/xml/rss/nyt/podcasts/healthupdate.xml
+  # Health Update — The New York Times; latest 2008-03-28
+- name: nyt_david_pogue
+  url: https://podcasts.nytimes.com/services/xml/rss/nyt/podcasts/pogue.xml
+  # David Pogue — The New York Times; latest 2007-10-11
+- name: nyt_nyt_op_ed_podcast
+  url: https://podcasts.nytimes.com/services/xml/rss/nyt/podcasts/ts-sample.xml
+  # NYT Op-Ed Podcast — The New York Times; latest 2007-08-05
+- name: nyt_wine_update
+  url: https://podcasts.nytimes.com/services/xml/rss/nyt/podcasts/wineupdate.xml
+  # Wine Update — The New York Times; latest 2007-05-09

@@ -86,9 +86,15 @@ const QD = 'https://qdrss.dev/ns';
 const tabs = document.getElementById('tabs');
 let collection = '';  // '' = every collection
 
-const LABELS = { ai: 'AI', history: 'History', finance: 'Finance', international: 'International', cricket: 'Cricket', american_football: 'American football', soccer: 'Soccer', nonprofit: 'Nonprofits', war: 'War' };
+const LABELS = { ai: 'AI', history: 'History', finance: 'Finance', international: 'International', cricket: 'Cricket', american_football: 'American football', soccer: 'Soccer', nonprofit: 'Nonprofits', war: 'War', nytimes: 'NYT' };
 // Example queries per collection; each returned several matches against the live corpus.
 const EXAMPLES = {
+  nytimes: ['The state of American democracy, elections and political polarization',
+            'Investigative series about crime, injustice and wrongful convictions',
+            'The best products to buy for your kitchen and home',
+            'Climate change, extreme weather and energy policy',
+            'Interviews with celebrities, actors and writers about their lives and work',
+            "The war in Ukraine and Russia's strategy"],
   '': ['How AI is changing jobs, productivity and financial markets, with evidence rather than hype',
        "Historical parallels drawn to today's geopolitical crises and wars",
        'The business of sport: league finances, club ownership and media rights deals'],
