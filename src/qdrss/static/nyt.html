@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NYT podcasts by topic</title>
+<style>
+  :root { --fg: #1a1a1a; --muted: #666; --line: #ddd; --bg: #fff; --accent: #0b5fff; --tag: #eef3ff; }
+  @media (prefers-color-scheme: dark) {
+    :root { --fg: #eee; --muted: #999; --line: #333; --bg: #111; --accent: #6ea0ff; --tag: #1d2a44; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0 auto; max-width: 760px; padding: 40px 16px 64px; font: 16px/1.5 system-ui, sans-serif; color: var(--fg); background: var(--bg); }
+  h1 { font-size: 26px; margin: 0 0 6px; letter-spacing: -.01em; }
+  .sub { color: var(--muted); margin: 0 0 24px; max-width: 620px; }
+  form { display: grid; gap: 12px; }
+  .ask { display: flex; gap: 8px; }
+  input[type=text] { flex: 1; font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+  button { font: inherit; padding: 10px 16px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; }
+  button:disabled { opacity: .6; cursor: wait; }
+  button.ghost { background: transparent; color: var(--accent); padding: 6px 12px; }
+  label.check { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); cursor: pointer; }
+  #examples { display: flex; flex-wrap: wrap; gap: 6px; }
+  #examples button { background: var(--tag); color: var(--accent); border: 0; border-radius: 999px; padding: 4px 12px; font-size: 13px; }
+  #feed { display: none; margin-top: 24px; }
+  #feed code { display: block; padding: 10px; border: 1px solid var(--line); border-radius: 8px; word-break: break-all; font-size: 13px; }
+  .row { display: flex; gap: 12px; align-items: center; margin-top: 8px; font-size: 14px; color: var(--muted); }
+  #status { margin-top: 20px; color: var(--muted); font-size: 14px; }
+  ol { list-style: none; padding: 0; margin: 12px 0 0; }
+  li { padding: 12px 0; border-top: 1px solid var(--line); }
+  li a { color: var(--fg); font-weight: 600; text-decoration: none; }
+  li a:hover { color: var(--accent); }
+  .meta { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .why { font-size: 14px; margin-top: 4px; }
+  .strong { display: inline-block; font-size: 11px; font-weight: 600; color: var(--accent); background: var(--tag); border-radius: 4px; padding: 0 6px; margin-right: 6px; }
+  footer { margin-top: 40px; color: var(--muted); font-size: 13px; }
+  footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+<h1>NYT podcasts by topic</h1>
+<p class="sub">Follow a subject, not a show. Ask in your own words and get every New York Times podcast episode about it, from The Daily, The Ezra Klein Show, Hard Fork and 70 other Times shows, back to 2006. Then subscribe to the topic as an RSS feed.</p>
+
+<form id="form">
+  <div class="ask">
+    <input id="q" type="text" placeholder="e.g. Phones, social media and teenagers' mental health" required autofocus aria-label="Topic">
+    <button id="go" type="submit">Search</button>
+  </div>
+  <div id="examples" aria-label="Example topics"></div>
+  <label class="check"><input id="archive" type="checkbox" checked> Include past episodes (otherwise only this week's new ones)</label>
+</form>
+
+<div id="feed">
+  <div class="row"><strong style="color: var(--fg)">Your topic feed</strong><span>add it to any RSS reader to get new episodes as they appear</span></div>
+  <code id="feedurl"></code>
+  <div class="row"><button type="button" class="ghost" id="copy">Copy</button><span id="copied"></span></div>
+</div>
+
+<div id="status"></div>
+<ol id="results"></ol>
+
+<footer>Feeds link to each episode's page; they work in RSS readers (Feedly, NetNewsWire, Reeder), not as playable podcasts. More topics and collections at <a href="/?collection=nytimes">rss.neuralweb.dev</a>.</footer>
+
+<script>
+// Each returned 4-6 of the hand-checked episodes across 5-7 shows (2026-10-02).
+const EXAMPLES = [
+  'ChatGPT and AI chatbots',
+  "Phones, social media and teenagers' mental health",
+  'Ozempic and the new weight-loss drugs',
+  'Elon Musk',
+  'Abortion politics after the Dobbs decision',
+];
+// Archived episodes are stamped with their publication date; reaching them
+// means a far-back since.
+const ARCHIVE_SINCE = '2000-01-01';
+const $ = id => document.getElementById(id);
+
+for (const q of EXAMPLES) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.textContent = q;
+  b.addEventListener('click', () => { $('q').value = q; $('form').requestSubmit(); });
+  $('examples').append(b);
+}
+
+function feedUrl() {
+  const p = new URLSearchParams({ q: $('q').value.trim(), collection: 'nytimes', limit: '40' });
+  if ($('archive').checked) p.set('since', ARCHIVE_SINCE);
+  return `${location.origin}/feed.xml?${p}`;
+}
+
+const text = (node, tag) => node.getElementsByTagName(tag)[0]?.textContent?.trim() || '';
+
+function render(xml) {
+  const doc = new DOMParser().parseFromString(xml, 'application/xml');
+  const items = [...doc.getElementsByTagName('item')];
+  const list = $('results');
+  list.replaceChildren();
+  for (const item of items) {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.textContent = text(item, 'title');
+    a.href = text(item, 'link');
+    a.target = '_blank';
+    a.rel = 'noopener';
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    const date = new Date(text(item, 'pubDate'));
+    meta.textContent = [text(item, 'source'), isNaN(date) ? '' : date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })].filter(Boolean).join(' · ');
+    // The description opens with the judge's verdict, e.g. "[strong] Why it fits."
+    const first = text(item, 'description').split('\n')[0];
+    const why = document.createElement('div');
+    why.className = 'why';
+    const match = first.match(/^\[(strong|relevant)\]\s*(.*)$/);
+    if (match) {
+      if (match[1] === 'strong') {
+        const tag = document.createElement('span');
+        tag.className = 'strong';
+        tag.textContent = 'strong match';
+        why.append(tag);
+      }
+      why.append(match[2]);
+    }
+    li.append(a, meta, why);
+    list.append(li);
+  }
+  return items.length;
+}
+
+$('form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const url = feedUrl();
+  history.replaceState(null, '', `?${new URLSearchParams({ q: $('q').value.trim(), ...($('archive').checked ? {} : { archive: '0' }) })}`);
+  $('feedurl').textContent = url;
+  $('feed').style.display = 'block';
+  $('copied').textContent = '';
+  $('go').disabled = true;
+  $('status').textContent = 'Searching every NYT episode…';
+  $('results').replaceChildren();
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(response.status === 429 ? 'Too many searches right now. Try again in a minute.' : `Search failed (${response.status})`);
+    const count = render(await response.text());
+    $('status').textContent = count ? `${count} episode${count === 1 ? '' : 's'}, newest first` : 'No matching episodes. Try wording the topic differently.';
+  } catch (error) {
+    $('status').textContent = error.message;
+  } finally {
+    $('go').disabled = false;
+  }
+});
+
+$('copy').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText($('feedurl').textContent); $('copied').textContent = 'Copied'; }
+  catch { $('copied').textContent = 'Select the URL and copy it'; }
+});
+
+// A shared link like /nyt?q=... runs the same search.
+const initial = new URLSearchParams(location.search);
+if (initial.get('archive') === '0') $('archive').checked = false;
+if (initial.get('q')) { $('q').value = initial.get('q'); $('form').requestSubmit(); }
+</script>
+</body>
+</html>

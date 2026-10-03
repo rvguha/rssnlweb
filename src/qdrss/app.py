@@ -261,6 +261,11 @@ def create_app(services: Services) -> Starlette:
     async def home(_: Request) -> Response:
         return FileResponse(STATIC / "index.html")
 
+    async def nyt(_: Request) -> Response:
+        # A landing page for the NYT podcasts collection alone: one question box,
+        # archive search on, results previewed and the topic feed's URL to copy.
+        return FileResponse(STATIC / "nyt.html")
+
     async def collections(_: Request) -> Response:
         return JSONResponse(await services.collection_counts())
 
@@ -287,6 +292,7 @@ def create_app(services: Services) -> Starlette:
     return Starlette(
         routes=[
             Route("/", home),
+            Route("/nyt", nyt),
             Route("/feed.xml", feed),
             Route("/collections", collections),
             Route("/health", health),
