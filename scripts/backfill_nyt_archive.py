@@ -141,7 +141,10 @@ def fetch_month(year: int, month: int, key: str) -> list[dict]:
 async def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--start", default="2006-01")
-    parser.add_argument("--end", default=datetime.now(UTC).strftime("%Y-%m"))
+    # The Archive API refuses the current month (403) until it is over.
+    now = datetime.now(UTC)
+    last = f"{now.year - (now.month == 1)}-{(now.month - 2) % 12 + 1:02d}"
+    parser.add_argument("--end", default=last)
     args = parser.parse_args()
     load_dotenv()
     key = os.environ["NYT_API_KEY"]
