@@ -28,6 +28,7 @@
   #preview { margin-top: 32px; }
   #status { color: var(--muted); font-size: 14px; }
   .item { padding: 14px 0; border-top: 1px solid var(--line); }
+  h3.earlier { margin: 24px 0 4px; font-size: 14px; font-weight: 600; color: var(--muted); }
   .item a { color: var(--fg); font-weight: 600; text-decoration: none; }
   .item a:hover { text-decoration: underline; }
   .meta { font-size: 13px; color: var(--muted); margin: 2px 0 6px; }
@@ -59,7 +60,7 @@
       <input id="limit" type="number" min="1" max="100" value="20">
     </label>
     <label class="check" title="Search every stored episode, not only what arrived this week">
-      <input id="archive" type="checkbox"> Include archive
+      <input id="archive" type="checkbox" checked> Include archive
     </label>
   </div>
   <div><button type="submit">Create feed</button></div>
@@ -229,13 +230,17 @@ function text(node, name) {
   return el ? el.textContent : '';
 }
 
-function render(xml) {
+function parse(xml) {
   const doc = new DOMParser().parseFromString(xml, 'application/xml');
   if (doc.getElementsByTagName('parsererror').length) throw new Error('feed is not valid XML');
-  const list = Array.from(doc.getElementsByTagName('item'));
-  items.innerHTML = '';
-  if (!list.length) { status.textContent = 'No matching items in the current window. Subscribe anyway; new matches appear as they arrive.'; return; }
-  status.textContent = `${list.length} item${list.length === 1 ? '' : 's'} match now`;
+  return Array.from(doc.getElementsByTagName('item'));
+}
+
+function render(list, heading) {
+  if (heading) {
+    const h = document.createElement('h3'); h.className = 'earlier'; h.textContent = heading;
+    items.append(h);
+  }
   for (const node of list) {
     const div = document.createElement('div');
     div.className = 'item';
@@ -252,12 +257,38 @@ function render(xml) {
   }
 }
 
+// Below this many matches in the window, the preview also shows earlier ones.
+// The feed only ever adds new items, so a niche topic can look empty on a quiet
+// week (cricket's spin-bowling example: 0 this week, dozens in the archive).
+const EARLIER_BELOW = 5;
+
+async function fetchItems(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+  return parse(await res.text());
+}
+
 async function preview(url) {
   status.textContent = 'Evaluating…'; items.innerHTML = '';
   try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
-    render(await res.text());
+    const recent = await fetchItems(url);
+    render(recent);
+    const archived = document.getElementById('archive').checked;
+    if (archived || recent.length >= EARLIER_BELOW) {
+      status.textContent = recent.length
+        ? `${recent.length} item${recent.length === 1 ? '' : 's'} match now`
+        : 'No matching items. Subscribe anyway; new matches appear as they arrive.';
+      return;
+    }
+    status.textContent = `${recent.length} new this week · looking for earlier matches…`;
+    const all = new URL(url);
+    all.searchParams.set('since', ARCHIVE_SINCE);
+    const seen = new Set(recent.map(node => text(node, 'link')));
+    const earlier = (await fetchItems(all)).filter(node => !seen.has(text(node, 'link')));
+    if (earlier.length) render(earlier, 'Earlier episodes (not in the feed, which only adds new ones)');
+    status.textContent = `${recent.length} new this week` +
+      (earlier.length ? ` · ${earlier.length} earlier match${earlier.length === 1 ? '' : 'es'} below` : '') +
+      '. Subscribe to get new matches as they arrive.';
   } catch (e) {
     status.innerHTML = `<span class="err">${e.message}</span>`;
   }
@@ -267,7 +298,10 @@ form.addEventListener('submit', (ev) => {
   ev.preventDefault();
   const url = feedUrl();
   urlText.textContent = url; openLink.href = url; urlBox.style.display = 'block';
-  history.replaceState(null, '', `?${new URL(url).searchParams}`);
+  // The archive is on by default, so only turning it off goes in the link.
+  const shared = new URL(url).searchParams;
+  if (!document.getElementById('archive').checked) shared.set('archive', '0');
+  history.replaceState(null, '', `?${shared}`);
   preview(url);
 });
 
@@ -285,7 +319,7 @@ loadTabs();
 if (initial.get('q')) {
   document.getElementById('q').value = initial.get('q');
   if (initial.get('limit')) document.getElementById('limit').value = initial.get('limit');
-  if (initial.get('since')) document.getElementById('archive').checked = true;
+  if (initial.get('archive') === '0') document.getElementById('archive').checked = false;
   form.requestSubmit();
 }
 </script>
