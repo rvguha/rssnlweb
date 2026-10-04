@@ -17,6 +17,9 @@ from starlette.requests import Request
 from starlette.responses import FileResponse, JSONResponse, PlainTextResponse, Response
 from starlette.routing import Route
 
+# Pages change with each deploy; without this browsers reuse a stale copy.
+NO_CACHE = {"cache-control": "no-cache"}
+
 from .config import Config, load_config
 from .feed import FeedRequest, Retriever, evaluate, render_rss
 from .feeds import parse_date
@@ -259,12 +262,12 @@ def create_app(services: Services) -> Starlette:
         return _feed_response(request, body, etag)
 
     async def home(_: Request) -> Response:
-        return FileResponse(STATIC / "index.html")
+        return FileResponse(STATIC / "index.html", headers=NO_CACHE)
 
     async def nyt(_: Request) -> Response:
         # A landing page for the NYT podcasts collection alone: one question box,
         # archive search on, results previewed and the topic feed's URL to copy.
-        return FileResponse(STATIC / "nyt.html")
+        return FileResponse(STATIC / "nyt.html", headers=NO_CACHE)
 
     async def collections(_: Request) -> Response:
         return JSONResponse(await services.collection_counts())
