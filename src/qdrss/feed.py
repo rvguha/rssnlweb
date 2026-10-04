@@ -58,8 +58,12 @@ async def evaluate(
     candidate_count: int,
     batch_size: int,
     window_days: int,
+    now: datetime | None = None,
 ) -> list[Match]:
-    since = request.since or datetime.now(UTC) - timedelta(days=window_days)
+    # `now` is injectable so the default window can be tested against fixed
+    # timestamps; reading the clock here made those tests expire a week after
+    # their fixture date.
+    since = request.since or (now or datetime.now(UTC)) - timedelta(days=window_days)
     vector = await _query_vector(embedder, request.q)
     candidates = await retriever.search(vector, since, request.collection, candidate_count)
     matches = await classify(request.q, candidates, ranker, batch_size)

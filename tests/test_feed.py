@@ -12,7 +12,7 @@ from qdrss.store import Store
 
 from .conftest import NOW, make_item
 
-OPTS = {"candidate_count": 3, "batch_size": 2, "window_days": 7}
+OPTS = {"candidate_count": 3, "batch_size": 2, "window_days": 7, "now": NOW}
 
 
 async def populated(store: Store):
@@ -53,6 +53,9 @@ async def test_default_window_when_no_since(store: Store):
     index = await populated(store)
     req = FeedRequest("rust", since=None, limit=10, threshold="relevant")
     matches = await evaluate(req, index, HashEmbeddings(), KeywordRanker(), **OPTS)
+    # Non-empty, or the check below passes vacuously (it did, once the window
+    # was read from the wall clock and drifted past the fixtures).
+    assert matches
     assert all(m.item.ingested_at > NOW - timedelta(days=7) for m in matches)
 
 
