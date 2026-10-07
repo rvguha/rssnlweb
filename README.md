@@ -23,6 +23,17 @@ Open <http://127.0.0.1:8000/>: type a query, get the feed URL and a preview of w
 returns now. The URL encodes the query; there is nothing to save on the server.
 `/health` shows item count, index age, and per-source fetch status.
 
+### This American Life by section
+
+`/tal` searches *This American Life* in passages of about two minutes and says where each one is: episode, act, and the
+second it starts at. The feed has one item per episode and cannot; the site's timed transcripts
+(`thisamericanlife.org/<n>/transcript`) can: a block per act, and a start time on every paragraph. `src/qdrss/tal.py` splits an
+episode into passages (an Item each, with its act, offsets, transcript anchor and an audio link at `#t=<seconds>` in the
+item's `extra` field, emitted by `/feed.xml` as `qd:offsetSeconds`, `qd:act`, `qd:audio` ...). The latest 15 episodes arrive
+through the feed (a source with `segmenter: tal`); `scripts/backfill_tal.py` adds the other ~880 once (about 28,000 passages).
+The transcripts' act names are the transcribers' and can lag a section (in #899 the block labelled Prologue holds the
+introduction and Part One); the offsets come from the paragraph times and are right.
+
 ## Keys and models
 
 All model calls go through [OpenRouter](https://openrouter.ai), one key for both

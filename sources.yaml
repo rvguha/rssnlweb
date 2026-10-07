@@ -1661,3 +1661,10 @@ npr:
 - name: npr_bright_lit_place
   url: https://publicfeeds.net/f/10127/feed-rss.xml
   # Bright Lit Place — NPR; latest 2026-02-10
+
+tal:
+# This American Life as passages with audio offsets, not one item per episode: the feed (latest 15) is expanded
+# through each episode's timed transcript (src/qdrss/tal.py); scripts/backfill_tal.py adds the history.
+- name: tal_this_american_life
+  url: https://www.thisamericanlife.org/podcast/rss.xml
+  segmenter: tal

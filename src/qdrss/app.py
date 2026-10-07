@@ -273,6 +273,10 @@ def create_app(services: Services) -> Starlette:
         # The same landing page for the NPR and public-radio podcasts collection.
         return FileResponse(STATIC / "npr.html", headers=NO_CACHE)
 
+    async def tal_page(_: Request) -> Response:
+        # This American Life by section: results are passages, each with the second it starts at.
+        return FileResponse(STATIC / "tal.html", headers=NO_CACHE)
+
     async def collections(_: Request) -> Response:
         return JSONResponse(await services.collection_counts())
 
@@ -301,6 +305,7 @@ def create_app(services: Services) -> Starlette:
             Route("/", home),
             Route("/nyt", nyt),
             Route("/npr", npr),
+            Route("/tal", tal_page),
             Route("/feed.xml", feed),
             Route("/collections", collections),
             Route("/health", health),

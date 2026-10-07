@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -104,7 +106,22 @@ def render_rss(request: FeedRequest, matches: list[Match], base_url: str) -> byt
         ET.SubElement(node, f"{{{NS}}}category").text = match.category
         ET.SubElement(node, f"{{{NS}}}ingestedAt").text = item.ingested_at.isoformat()
         ET.SubElement(node, f"{{{NS}}}source").text = item.source
+        _section(node, item.extra)
     return ET.tostring(rss, encoding="utf-8", xml_declaration=True)
+
+
+def _section(node: ET.Element, extra: str) -> None:
+    """An item that is one section of a longer recording says where: episode, act, and the offset in seconds."""
+    if not extra:
+        return
+    try:
+        info = json.loads(extra)
+    except ValueError:
+        return
+    for key in ("episode", "act", "actId", "start", "end", "transcript", "audio"):
+        if info.get(key) not in (None, ""):
+            text = f"{info[key]:.1f}" if isinstance(info[key], float) else str(info[key])
+            ET.SubElement(node, f"{{{NS}}}{'offsetSeconds' if key == 'start' else 'endSeconds' if key == 'end' else key}").text = text
 
 
 def _description(match: Match) -> str:

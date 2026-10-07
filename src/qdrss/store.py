@@ -24,7 +24,8 @@ CREATE TABLE IF NOT EXISTS items (
     published_at TEXT,
     published_raw TEXT NOT NULL,
     ingested_at TEXT NOT NULL,
-    collection TEXT NOT NULL DEFAULT ''
+    collection TEXT NOT NULL DEFAULT '',
+    extra TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX IF NOT EXISTS items_ingested ON items (ingested_at);
 CREATE TABLE IF NOT EXISTS sources (
@@ -56,6 +57,8 @@ class Store:
         cols = {row[1] for row in self.db.execute("PRAGMA table_info(items)")}
         if "collection" not in cols:
             self.db.execute("ALTER TABLE items ADD COLUMN collection TEXT NOT NULL DEFAULT ''")
+        if "extra" not in cols:
+            self.db.execute("ALTER TABLE items ADD COLUMN extra TEXT NOT NULL DEFAULT ''")
 
     async def setup(self) -> None:
         return None
@@ -79,12 +82,13 @@ class Store:
                 item.published_raw,
                 _iso(item.ingested_at),
                 item.collection,
+                item.extra,
             )
             for item in items
         ]
         with self.db:
             cursor = self.db.executemany(
-                "INSERT OR IGNORE INTO items VALUES (?,?,?,?,?,?,?,?,?,?)", rows
+                "INSERT OR IGNORE INTO items VALUES (?,?,?,?,?,?,?,?,?,?,?)", rows
             )
         return cursor.rowcount
 
@@ -189,4 +193,5 @@ def _row_item(row: tuple) -> Item:
         published_raw=row[7],
         ingested_at=datetime.fromisoformat(row[8]),
         collection=row[9] if len(row) > 9 else "",
+        extra=row[10] if len(row) > 10 else "",
     )

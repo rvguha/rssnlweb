@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>This American Life, by section</title>
+<style>
+  :root { --fg: #1a1a1a; --muted: #666; --line: #ddd; --bg: #fff; --accent: #0b5fff; --tag: #eef3ff; }
+  @media (prefers-color-scheme: dark) {
+    :root { --fg: #eee; --muted: #999; --line: #333; --bg: #111; --accent: #6ea0ff; --tag: #1d2a44; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0 auto; max-width: 760px; padding: 40px 16px 64px; font: 16px/1.5 system-ui, sans-serif; color: var(--fg); background: var(--bg); }
+  h1 { font-size: 26px; margin: 0 0 6px; letter-spacing: -.01em; }
+  .sub { color: var(--muted); margin: 0 0 24px; max-width: 620px; }
+  form { display: grid; gap: 12px; }
+  .ask { display: flex; gap: 8px; }
+  input[type=text] { flex: 1; font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+  button { font: inherit; padding: 10px 16px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; }
+  button:disabled { opacity: .6; cursor: wait; }
+  button.ghost { background: transparent; color: var(--accent); padding: 6px 12px; }
+  label.check { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); cursor: pointer; }
+  #examples { display: flex; flex-wrap: wrap; gap: 6px; }
+  #examples button { background: var(--tag); color: var(--accent); border: 0; border-radius: 999px; padding: 4px 12px; font-size: 13px; }
+  #feed { display: none; margin-top: 24px; }
+  #feed code { display: block; padding: 10px; border: 1px solid var(--line); border-radius: 8px; word-break: break-all; font-size: 13px; }
+  .row { display: flex; gap: 12px; align-items: center; margin-top: 8px; font-size: 14px; color: var(--muted); }
+  #status { margin-top: 20px; color: var(--muted); font-size: 14px; }
+  ol { list-style: none; padding: 0; margin: 12px 0 0; }
+  li { padding: 12px 0; border-top: 1px solid var(--line); }
+  li a { color: var(--fg); font-weight: 600; text-decoration: none; }
+  li a:hover { color: var(--accent); }
+  .meta { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .why { font-size: 14px; margin-top: 4px; }
+  .strong { display: inline-block; font-size: 11px; font-weight: 600; color: var(--accent); background: var(--tag); border-radius: 4px; padding: 0 6px; margin-right: 6px; }
+  footer { margin-top: 40px; color: var(--muted); font-size: 13px; }
+  footer a { color: var(--accent); }
+
+  .why { font-size: 14px; margin-top: 4px; }
+  .ep { margin-top: 26px; }
+  .ep h2 { font-size: 17px; margin: 0; }
+  .ep .meta { margin-bottom: 4px; }
+  .hit { padding: 10px 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 76px 1fr; gap: 12px; }
+  .play { font: inherit; font-variant-numeric: tabular-nums; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--accent); background: transparent; color: var(--accent); cursor: pointer; align-self: start; }
+  .play:hover { background: var(--tag); }
+  .excerpt { color: var(--muted); font-size: 14px; margin-top: 4px; }
+  .hit a { color: var(--accent); font-size: 13px; }
+  #player { position: sticky; bottom: 0; background: var(--bg); padding: 10px 0; border-top: 1px solid var(--line); display: none; }
+  #player audio { width: 100%; }
+  #player .now { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<h1>This American Life, by section</h1>
+<p class="sub">Ask in your own words and get the moment in the show: which episode, which act, and the exact time to press play. Every episode is searched in two-minute passages from its transcript, from #1 to the latest.</p>
+
+<form id="form">
+  <div class="ask">
+    <input id="q" type="text" placeholder="e.g. A story about a family keeping a secret" required autofocus aria-label="Topic">
+    <button id="go" type="submit">Search</button>
+  </div>
+  <div id="examples" aria-label="Example topics"></div>
+  <label class="check"><input id="archive" type="checkbox" checked> Include past episodes (otherwise only this week's new ones)</label>
+</form>
+
+<div id="feed">
+  <div class="row"><strong style="color: var(--fg)">Your topic feed</strong><span>each item is one passage and says where in the episode it is</span></div>
+  <code id="feedurl"></code>
+  <div class="row"><button type="button" class="ghost" id="copy">Copy</button><span id="copied"></span></div>
+</div>
+
+<div id="status"></div>
+<div id="results"></div>
+<div id="player"><div class="now" id="now"></div><audio id="audio" controls preload="none"></audio></div>
+
+<footer>Passages come from <a href="https://www.thisamericanlife.org">thisamericanlife.org</a> transcripts, which carry the times; act names are the transcribers' and can lag a section. Audio plays from the show's own site. More at <a href="/?collection=npr">rss.neuralweb.dev</a>.</footer>
+
+<script>
+// Each returned 4-35 passages from at least 4 episodes against the full corpus (891 episodes, #1-#899, checked 2026-10-07).
+const EXAMPLES = [
+  'A story about a family keeping a secret',
+  'Someone who lied to get a job',
+  'Why people believe conspiracy theories',
+  'A small town fighting over a school',
+  'Grief and what people do afterwards',
+];
+const ARCHIVE_SINCE = '2000-01-01';
+const NS = 'https://qdrss.dev/ns';
+const $ = id => document.getElementById(id);
+
+for (const q of EXAMPLES) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.textContent = q;
+  b.addEventListener('click', () => { $('q').value = q; $('form').requestSubmit(); });
+  $('examples').append(b);
+}
+
+function feedUrl() {
+  const p = new URLSearchParams({ q: $('q').value.trim(), collection: 'tal', limit: '40' });
+  if ($('archive').checked) p.set('since', ARCHIVE_SINCE);
+  return `${location.origin}/feed.xml?${p}`;
+}
+
+const text = (node, tag) => node.getElementsByTagName(tag)[0]?.textContent?.trim() || '';
+const qd = (node, tag) => node.getElementsByTagNameNS(NS, tag)[0]?.textContent?.trim() || '';
+const clock = s => { s = Math.floor(s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), r = s % 60;
+  return h ? `${h}:${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}` : `${m}:${String(r).padStart(2, '0')}`; };
+
+function play(audio, seconds, label) {
+  const p = $('audio');
+  $('player').style.display = 'block';
+  $('now').textContent = `${label} · from ${clock(seconds)}`;
+  const base = audio.split('#')[0];
+  const seek = () => { p.currentTime = seconds; p.play().catch(() => {}); };
+  if (p.dataset.src !== base) { p.dataset.src = base; p.src = base; p.addEventListener('loadedmetadata', seek, { once: true }); p.load(); }
+  else seek();
+}
+
+function render(xml) {
+  const doc = new DOMParser().parseFromString(xml, 'application/xml');
+  const hits = [...doc.getElementsByTagName('item')].map(item => {
+    const m = text(item, 'description').split('\n')[0].match(/^\[(strong|relevant)\]\s*(.*)$/);
+    return { title: text(item, 'title'), link: text(item, 'link'), when: new Date(text(item, 'pubDate')),
+             episode: +qd(item, 'episode'), act: qd(item, 'act'), start: parseFloat(qd(item, 'offsetSeconds')),
+             audio: qd(item, 'audio'), transcript: qd(item, 'transcript'), strong: m?.[1] === 'strong', why: m?.[2] || '',
+             excerpt: text(item, 'description').split('\n').slice(2).join(' ').trim() };
+  }).filter(h => !isNaN(h.start));
+  const byEpisode = new Map();
+  for (const h of hits) { if (!byEpisode.has(h.episode)) byEpisode.set(h.episode, []); byEpisode.get(h.episode).push(h); }
+  const list = $('results');
+  list.replaceChildren();
+  for (const [, group] of byEpisode) {
+    group.sort((a, b) => a.start - b.start);
+    const ep = document.createElement('div'); ep.className = 'ep';
+    const h2 = document.createElement('h2');
+    const a = document.createElement('a'); a.textContent = group[0].title.split(' — ')[0]; a.href = group[0].link; a.target = '_blank'; a.rel = 'noopener';
+    a.style.color = 'inherit'; a.style.textDecoration = 'none';
+    h2.append(a);
+    const meta = document.createElement('div'); meta.className = 'meta';
+    meta.textContent = isNaN(group[0].when) ? '' : group[0].when.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    ep.append(h2, meta);
+    for (const h of group) {
+      const row = document.createElement('div'); row.className = 'hit';
+      const btn = document.createElement('button'); btn.className = 'play'; btn.type = 'button';
+      btn.textContent = `▶ ${clock(h.start)}`; btn.title = 'Play from here';
+      if (h.audio) btn.addEventListener('click', () => play(h.audio, h.start, h.title)); else btn.disabled = true;
+      const body = document.createElement('div');
+      const act = document.createElement('div'); act.className = 'meta';
+      act.textContent = h.act;
+      if (h.strong) { const t = document.createElement('span'); t.className = 'strong'; t.textContent = 'strong match'; act.prepend(t); }
+      const why = document.createElement('div'); why.className = 'why'; why.textContent = h.why;
+      const ex = document.createElement('div'); ex.className = 'excerpt'; ex.textContent = h.excerpt.length > 240 ? h.excerpt.slice(0, 240) + '…' : h.excerpt;
+      const tr = document.createElement('a'); tr.textContent = 'transcript'; tr.href = h.transcript; tr.target = '_blank'; tr.rel = 'noopener';
+      body.append(act, why, ex, tr);
+      row.append(btn, body); ep.append(row);
+    }
+    list.append(ep);
+  }
+  return hits.length;
+}
+
+$('form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const url = feedUrl();
+  history.replaceState(null, '', `?${new URLSearchParams({ q: $('q').value.trim(), ...($('archive').checked ? {} : { archive: '0' }) })}`);
+  $('feedurl').textContent = url;
+  $('feed').style.display = 'block';
+  $('copied').textContent = '';
+  $('go').disabled = true;
+  $('status').textContent = 'Searching every episode…';
+  $('results').replaceChildren();
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(response.status === 429 ? 'Too many searches right now. Try again in a minute.' : `Search failed (${response.status})`);
+    const count = render(await response.text());
+    $('status').textContent = count ? `${count} passage${count === 1 ? '' : 's'}, grouped by episode, with the time each starts` : 'No matching passages. Try wording the topic differently.';
+  } catch (error) {
+    $('status').textContent = error.message;
+  } finally {
+    $('go').disabled = false;
+  }
+});
+
+$('copy').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText($('feedurl').textContent); $('copied').textContent = 'Copied'; }
+  catch { $('copied').textContent = 'Select the URL and copy it'; }
+});
+
+const initial = new URLSearchParams(location.search);
+if (initial.get('archive') === '0') $('archive').checked = false;
+if (initial.get('q')) { $('q').value = initial.get('q'); $('form').requestSubmit(); }
+</script>
+</body>
+</html>

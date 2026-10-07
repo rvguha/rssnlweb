@@ -18,6 +18,7 @@ class Item:
     published_raw: str  # as it appeared in the feed
     ingested_at: datetime  # first time we stored it, UTC; never changes
     collection: str = ""  # manifest section of the source; set at ingest
+    extra: str = ""  # JSON for items that are a section of something longer (see tal.py); "" for ordinary items
 
     @property
     def text(self) -> str:
