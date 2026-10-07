@@ -34,7 +34,7 @@ async def test_provider_returning_no_content_is_excluded_on_retry():
     assert await r.structured("i", {"q": "x"}) == {"results": []}
     first, second = r.client.calls
     assert first["extra_body"]["provider"] == {"sort": "throughput"}
-    assert second["extra_body"]["provider"] == {"sort": "throughput", "ignore": ["Groq"]}
+    assert second["extra_body"]["provider"] == {"sort": "throughput", "ignore": ["Groq"], "require_parameters": True}
 
 
 async def test_no_retry_when_the_first_call_has_content():

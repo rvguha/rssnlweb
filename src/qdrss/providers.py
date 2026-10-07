@@ -91,7 +91,10 @@ class OpenRouter:
         if self.provider_sort:
             provider["sort"] = self.provider_sort
         if ignore:
+            # A retry: skip the provider that failed, and take only providers that support every
+            # parameter sent (json_object output), so the second try is a more capable one.
             provider["ignore"] = ignore
+            provider["require_parameters"] = True
         return await self.client.chat.completions.create(
             model=self.ranking_model,
             messages=[
