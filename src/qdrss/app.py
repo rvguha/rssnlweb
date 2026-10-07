@@ -269,6 +269,10 @@ def create_app(services: Services) -> Starlette:
         # archive search on, results previewed and the topic feed's URL to copy.
         return FileResponse(STATIC / "nyt.html", headers=NO_CACHE)
 
+    async def npr(_: Request) -> Response:
+        # The same landing page for the NPR and public-radio podcasts collection.
+        return FileResponse(STATIC / "npr.html", headers=NO_CACHE)
+
     async def collections(_: Request) -> Response:
         return JSONResponse(await services.collection_counts())
 
@@ -296,6 +300,7 @@ def create_app(services: Services) -> Starlette:
         routes=[
             Route("/", home),
             Route("/nyt", nyt),
+            Route("/npr", npr),
             Route("/feed.xml", feed),
             Route("/collections", collections),
             Route("/health", health),
