@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import re
 from typing import Any, Protocol
 
 import numpy as np
 from openai import AsyncOpenAI
+
+logger = logging.getLogger(__name__)
 
 
 class Embeddings(Protocol):
@@ -83,8 +86,13 @@ class OpenRouter:
         matrix /= np.maximum(np.linalg.norm(matrix, axis=1, keepdims=True), 1e-12)
         return matrix
 
-    async def structured(self, instruction: str, payload: dict[str, Any]) -> dict[str, Any]:
-        response = await self.client.chat.completions.create(
+    async def _ranking_call(self, instruction: str, payload: dict[str, Any], ignore: list[str]):
+        provider: dict[str, Any] = {}
+        if self.provider_sort:
+            provider["sort"] = self.provider_sort
+        if ignore:
+            provider["ignore"] = ignore
+        return await self.client.chat.completions.create(
             model=self.ranking_model,
             messages=[
                 {"role": "system", "content": instruction},
@@ -96,12 +104,25 @@ class OpenRouter:
             # low; the cap bounds the damage when a model degenerates into
             # thousands of lines of broken JSON (seen with gpt-oss-20b).
             max_tokens=1500,
-            extra_body={
-                "reasoning": {"effort": "low"},
-                **({"provider": {"sort": self.provider_sort}} if self.provider_sort else {}),
-            },
+            extra_body={"reasoning": {"effort": "low"}, **({"provider": provider} if provider else {})},
         )
+
+    async def structured(self, instruction: str, payload: dict[str, Any]) -> dict[str, Any]:
+        response = await self._ranking_call(instruction, payload, [])
         content = response.choices[0].message.content
+        if not content:
+            # A provider can end a call with finish_reason "error" and no content after the
+            # model has reasoned (seen with Groq's gpt-oss-20b). Temperature is 0, so the same
+            # provider fails the same way on every retry; the query then 503s for good. Try
+            # again with that provider excluded.
+            failed = getattr(response, "provider", None)
+            logger.warning(
+                "ranking call returned no content (finish=%s, provider=%s)%s",
+                response.choices[0].finish_reason, failed, "; retrying without it" if failed else "",
+            )
+            if failed:
+                response = await self._ranking_call(instruction, payload, [failed])
+                content = response.choices[0].message.content
         if not content:
             raise RuntimeError("ranking model returned an empty response")
         try:
