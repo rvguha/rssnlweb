@@ -56,6 +56,12 @@ class Services:
             from .store import Store
 
             self.store = Store(config.db_path)
+        self.memory = None
+        if self.cosmos and config.memory_collections and config.memory_snapshot:
+            from .memory import MemoryRetriever
+
+            self.memory = MemoryRetriever(self.store, self.collections, list(config.memory_collections),
+                                          config.memory_snapshot)
         self.index: Index = Index([], np.zeros((0, 1), dtype=np.float32))
         self.ready_at: datetime | None = None
         self.last_refresh: dict = {}
@@ -70,10 +76,14 @@ class Services:
 
     @property
     def retriever(self) -> Retriever:
+        if self.memory:
+            return self.memory
         return self.store if self.cosmos else self.index  # type: ignore[return-value]
 
     async def setup(self) -> None:
         await self.store.setup()
+        if self.memory:
+            await self.memory.load()
         if self.cosmos:
             self.ready_at = datetime.now(UTC)
 
@@ -284,6 +294,7 @@ def create_app(services: Services) -> Starlette:
         return JSONResponse(
             {
                 "store": "cosmos" if services.cosmos else "sqlite",
+                "in_memory": services.memory.status if services.memory else {},
                 "items": await services.store.count(),
                 "index_built_at": services.ready_at.isoformat() if services.ready_at else None,
                 "last_refresh": services.last_refresh,

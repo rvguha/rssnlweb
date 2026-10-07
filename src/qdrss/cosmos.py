@@ -209,6 +209,15 @@ class CosmosStore:
         out.sort(key=lambda c: c.score)  # VectorDistance: smaller is closer
         return out[:limit]
 
+    async def items_since(self, collection: str, since_ts: float) -> list[tuple[Item, np.ndarray]]:
+        """Embedded items of a collection ingested after `since_ts`, with their vectors (see memory.py)."""
+        rows = self._items.query_items(
+            "SELECT c.item_id, c.source, c.source_title, c.url, c.title, c.snippet, c.content, c.published_at, "
+            "c.published_raw, c.ingested_at, c.collection, c.extra, c.embedding FROM c "
+            "WHERE IS_DEFINED(c.embedding) AND c.ingested_ts > @since",
+            parameters=[{"name": "@since", "value": since_ts}], partition_key=collection)
+        return [(_item(row), np.asarray(row["embedding"], dtype=np.float32)) async for row in rows]
+
     async def count(self) -> int:
         rows = self._items.query_items("SELECT VALUE COUNT(1) FROM c WHERE c.kind = 'item'")
         async for n in rows:
