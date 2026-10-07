@@ -92,9 +92,15 @@ const QD = 'https://qdrss.dev/ns';
 const tabs = document.getElementById('tabs');
 let collection = '';  // '' = every collection
 
-const LABELS = { ai: 'AI', history: 'History', finance: 'Finance', international: 'International', cricket: 'Cricket', american_football: 'American football', soccer: 'Soccer', nonprofit: 'Nonprofits', war: 'War', nytimes: 'NYT' };
+const LABELS = { ai: 'AI', history: 'History', finance: 'Finance', international: 'International', cricket: 'Cricket', american_football: 'American football', soccer: 'Soccer', nonprofit: 'Nonprofits', war: 'War', nytimes: 'NYT', npr: 'NPR' };
 // Example queries per collection; each returned several matches against the live corpus.
 const EXAMPLES = {
+  npr: ['The economics of housing, rent and the cost of living',
+        'Immigration policy and the debate over deportations',
+        'Artificial intelligence and the future of work',
+        'The Supreme Court and its major rulings',
+        'How climate change is reshaping cities and communities',
+        'Personal stories about family, grief and growing up'],
   nytimes: ['The state of American democracy, elections and political polarization',
             'Investigative series about crime, injustice and wrongful convictions',
             'The best products to buy for your kitchen and home',

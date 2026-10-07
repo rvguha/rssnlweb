@@ -1361,3 +1361,303 @@ nytimes:
 - name: nyt_wine_update
   url: https://podcasts.nytimes.com/services/xml/rss/nyt/podcasts/wineupdate.xml
   # Wine Update — The New York Times; latest 2007-05-09
+
+npr:
+# The NPR universe, checked 2026-10-07 (every feed fetched and parsed with QDRSS's own parser):
+# the shows NPR publishes (Apple's publisher "NPR" and "NPR Network"), plus public-radio shows
+# from NPR member stations and producers (WNYC, WBEZ, WBUR, WHYY, KCRW, KQED, GBH, OPB, MPR/APM,
+# PRX and others), newest first. Only shows with an episode since 2026-01-01 are listed. Left out:
+# NPR News Now (hourly newscast), feeds that repeat another listed feed's episodes (Fresh Air and
+# Life Kit topic feeds, Planet Money series), and Texas Standard, whose host answers 403 to
+# non-browser clients (its feed is https://kutkutx.studio/category/texas-standard/feed).
+- name: npr_fresh_air
+  url: https://feeds.npr.org/381444908/podcast.xml
+  # Fresh Air — NPR; latest 2026-10-07
+- name: npr_world_cafe_words_and_music_podcast
+  url: https://feeds.npr.org/510008/podcast.xml
+  # World Cafe Words and Music Podcast — NPR; latest 2026-10-06
+- name: npr_up_first_from_npr
+  url: https://feeds.npr.org/510318/podcast.xml
+  # Up First from NPR — NPR; latest 2026-10-06
+- name: npr_think_out_loud
+  url: https://feed.cdnstream1.com/zjb/feed/download/08/24/d7/0824d7fa-02f5-4c98-8baa-c7c4c00d7e9f.xml
+  # Think Out Loud — Oregon Public Broadcasting; latest 2026-10-06
+- name: npr_the_world_latest_stories
+  url: https://latest-stories.feed.theworld.org/
+  # The World: Latest Stories — PRX; latest 2026-10-06
+- name: npr_the_source
+  url: https://www.tpr.org/podcast/the-source/rss.xml
+  # The Source — David Martin Davies; latest 2026-10-06
+- name: npr_the_rundown_chicago_news
+  url: https://rundown.podcasts.wbez.org
+  # The Rundown | Chicago News — WBEZ Chicago; latest 2026-10-06
+- name: npr_the_npr_politics_podcast
+  url: https://feeds.npr.org/510310/podcast.xml
+  # The NPR Politics Podcast — NPR; latest 2026-10-06
+- name: npr_the_moth
+  url: http://feeds.feedburner.com/themothpodcast
+  # The Moth — The Moth; latest 2026-10-06
+- name: npr_the_indicator_from_planet_money
+  url: https://feeds.npr.org/510325/podcast.xml
+  # The Indicator from Planet Money — NPR; latest 2026-10-06
+- name: npr_the_brian_lehrer_show
+  url: https://feeds.simplecast.com/C8a1jmw4
+  # The Brian Lehrer Show — WNYC; latest 2026-10-06
+- name: npr_the_best_of_car_talk
+  url: https://feeds.npr.org/510208/podcast.xml
+  # The Best of Car Talk — NPR; latest 2026-10-06
+- name: npr_the_bay
+  url: https://feeds.megaphone.fm/KQINC8259786327
+  # The Bay — KQED; latest 2026-10-06
+- name: npr_storycorps
+  url: https://feeds.npr.org/510200/podcast.xml
+  # StoryCorps — NPR; latest 2026-10-06
+- name: npr_state_of_the_world_from_npr
+  url: https://feeds.npr.org/510366/podcast.xml
+  # State of the World from NPR — NPR; latest 2026-10-06
+- name: npr_short_wave
+  url: https://feeds.npr.org/510351/podcast.xml
+  # Short Wave — NPR; latest 2026-10-06
+- name: npr_seattle_now
+  url: https://www.omnycontent.com/d/playlist/fa64d43e-1285-4f73-948e-aeae00546c65/02438091-7fbb-4dc9-9e5c-b17c013df16e/2998c787-c3cb-49fd-b060-b17c013df199/podcast.rss
+  # Seattle Now — KUOW News and Information; latest 2026-10-06
+- name: npr_science_friday
+  url: https://feeds.simplecast.com/h18ZIZD_
+  # Science Friday — Science Friday and WNYC Studios; latest 2026-10-06
+- name: npr_press_play_with_madeleine_brand
+  url: https://feed.cdnstream1.com/zjb/feed/download/41/05/05/41050524-2924-4132-bb75-8f0a8f997937.xml
+  # Press Play with Madeleine Brand — KCRW; latest 2026-10-06
+- name: npr_pop_culture_happy_hour
+  url: https://feeds.npr.org/510282/podcast.xml
+  # Pop Culture Happy Hour — NPR; latest 2026-10-06
+- name: npr_on_point_with_meghna_chakrabarti
+  url: https://rss.wbur.org/onpoint/podcast
+  # On Point with Meghna Chakrabarti — WBUR; latest 2026-10-06
+- name: npr_npr_s_book_of_the_day
+  url: https://feeds.npr.org/510364/podcast.xml
+  # NPR's Book of the Day — NPR; latest 2026-10-06
+- name: npr_npr_music
+  url: https://feeds.npr.org/510019/podcast.xml
+  # NPR Music — NPR; latest 2026-10-06
+- name: npr_marketplace_tech
+  url: https://feeds.publicradio.org/public_feeds/marketplace-tech
+  # Marketplace Tech — Marketplace; latest 2026-10-06
+- name: npr_marketplace_morning_report
+  url: https://feeds.publicradio.org/public_feeds/marketplace-morning-report
+  # Marketplace Morning Report — Marketplace; latest 2026-10-06
+- name: npr_marketplace
+  url: https://feeds.publicradio.org/public_feeds/marketplace
+  # Marketplace — Marketplace; latest 2026-10-06
+- name: npr_mpr_news_with_angela_davis
+  url: https://feeds.publicradio.org/public_feeds/mpr-news-with-angela-davis
+  # MPR News with Angela Davis — Minnesota Public Radio; latest 2026-10-06
+- name: npr_life_kit
+  url: https://feeds.npr.org/510338/podcast.xml
+  # Life Kit — NPR; latest 2026-10-06
+- name: npr_kqed_s_forum
+  url: https://feeds.megaphone.fm/KQINC9557381633
+  # KQED's Forum — KQED; latest 2026-10-06
+- name: npr_it_s_been_a_minute
+  url: https://feeds.npr.org/510317/podcast.xml
+  # It's Been a Minute — NPR; latest 2026-10-06
+- name: npr_insight_with_vicki_gonzalez
+  url: https://feeds.feedburner.com/CapitalPublicRadioInsightPodcast
+  # Insight With Vicki Gonzalez — CapRadio; latest 2026-10-06
+- name: npr_in_the_loop_with_sasha_ann_simons
+  url: https://intheloop.podcasts.wbez.org
+  # In the Loop with Sasha-Ann Simons — WBEZ Chicago; latest 2026-10-06
+- name: npr_here_and_now_anytime
+  url: https://feeds.npr.org/510051/podcast.xml
+  # Here & Now Anytime — NPR; latest 2026-10-06
+- name: npr_crosscurrents
+  url: https://publicfeeds.net/f/9927/feed-rss.xml
+  # Crosscurrents — KALW; latest 2026-10-06
+- name: npr_consider_this_from_npr
+  url: https://feeds.npr.org/510355/podcast.xml
+  # Consider This from NPR — NPR; latest 2026-10-06
+- name: npr_code_switch
+  url: https://feeds.npr.org/510312/podcast.xml
+  # Code Switch — NPR; latest 2026-10-06
+- name: npr_bullseye_with_jesse_thorn
+  url: https://feeds.npr.org/510309/podcast.xml
+  # Bullseye with Jesse Thorn — NPR; latest 2026-10-06
+- name: npr_boston_public_radio_podcast
+  url: https://feeds.wgbh.org/154/feed-rss.xml
+  # Boston Public Radio Podcast — GBH News; latest 2026-10-06
+- name: npr_bay_curious
+  url: https://feeds.megaphone.fm/KQINC4698044094
+  # Bay Curious — KQED; latest 2026-10-06
+- name: npr_are_we_doomed
+  url: https://publicfeeds.net/f/16857/are-we-doomed
+  # Are We Doomed? — NPR; latest 2026-10-06
+- name: npr_all_songs_considered
+  url: https://feeds.npr.org/g-s1-111189/podcast.xml
+  # All Songs Considered — NPR; latest 2026-10-06
+- name: npr_airtalk
+  url: https://www.omnycontent.com/d/playlist/acc8cc57-ff7c-44c5-9bd6-ab0900fbdc43/39d4b39e-aa2d-40b1-bc07-ab2201235e43/f9e7dcf5-d162-4723-b710-ab2201235e4c/podcast.rss
+  # AirTalk — LAist; latest 2026-10-06
+- name: npr_99_invisible
+  url: https://feeds.simplecast.com/BqbsxVfO
+  # 99% Invisible — Roman Mars; latest 2026-10-06
+- name: npr_1a
+  url: https://feeds.npr.org/510316/podcast.xml
+  # 1A — NPR; latest 2026-10-06
+- name: npr_this_american_life
+  url: https://www.thisamericanlife.org/podcast/rss.xml
+  # This American Life — This American Life; latest 2026-10-05
+- name: npr_soundcheck
+  url: https://feeds.simplecast.com/ZbB7ujAy
+  # Soundcheck — WNYC Studios; latest 2026-10-05
+- name: npr_selected_shorts
+  url: https://rss.introcast.io/253191824/feeds.simplecast.com/ZoGIhfvz
+  # Selected Shorts — Symphony Space; latest 2026-10-05
+- name: npr_good_food
+  url: https://feed.cdnstream1.com/zjb/feed/download/4b/e5/cc/4be5cc7b-8528-4b9e-8981-08d89bcff381.xml
+  # Good Food — KCRW; latest 2026-10-05
+- name: npr_from_the_top
+  url: https://feeds.npr.org/510026/podcast.xml
+  # From the Top — NPR; latest 2026-10-05
+- name: npr_closer_look_with_rose_scott
+  url: https://www.omnycontent.com/d/playlist/5ec71174-b7c1-46da-88de-b18e00b479cf/f19721af-787e-47a2-8a86-b21601287a49/305c7afa-a1e0-4df6-8157-b21601287a62/podcast.rss
+  # Closer Look with Rose Scott — WABE; latest 2026-10-05
+- name: npr_the_sunday_story
+  url: https://feeds.npr.org/g-s1-110423/podcast.xml
+  # The Sunday Story — NPR; latest 2026-10-04
+- name: npr_latino_usa
+  url: https://www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/eba15fe4-c3fd-4e63-a8f9-b2dc01092685/a324c6a1-2e41-486b-b538-b2dc010926c5/podcast.rss
+  # Latino USA — My Cultura, Futuro and iHeartPodcasts; latest 2026-10-04
+- name: npr_wait_wait_don_t_tell_me
+  url: https://feeds.npr.org/344098539/podcast.xml
+  # Wait Wait... Don't Tell Me! — NPR; latest 2026-10-03
+- name: npr_reveal
+  url: https://feeds.revealradio.org/revealpodcast
+  # Reveal — The Center for Investigative Reporting and PRX; latest 2026-10-03
+- name: npr_on_the_media
+  url: https://feeds.simplecast.com/o4jAFXaw
+  # On the Media — WNYC Studios; latest 2026-10-03
+- name: npr_the_splendid_table_conversations_and_recipes_for_curious_cooks_and_eaters
+  url: https://feeds.publicradio.org/public_feeds/the-splendid-table
+  # The Splendid Table: Conversations & Recipes For Curious Cooks & Eaters — American Public Media; latest 2026-10-02
+- name: npr_ted_radio_hour
+  url: https://feeds.npr.org/510298/podcast.xml
+  # TED Radio Hour — NPR; latest 2026-10-02
+- name: npr_radiolab
+  url: https://feeds.simplecast.com/EmVW7VGp
+  # Radiolab — WNYC Studios; latest 2026-10-02
+- name: npr_planet_money
+  url: https://feeds.npr.org/510289/podcast.xml
+  # Planet Money — NPR; latest 2026-10-02
+- name: npr_live_wire_with_luke_burbank
+  url: https://feed.livewireradio.org/
+  # Live Wire with Luke Burbank — PRX; latest 2026-10-02
+- name: npr_kcrw_s_left_right_and_center
+  url: https://leftrightandcenter-feed.kcrw.com
+  # KCRW's Left, Right & Center — KCRW; latest 2026-10-02
+- name: npr_fronteras
+  url: https://www.tpr.org/podcast/fronteras/rss.xml
+  # Fronteras — Texas Public Radio; latest 2026-10-02
+- name: npr_endless_thread
+  url: https://rss.wbur.org/endlessthread/podcast
+  # Endless Thread — WBUR; latest 2026-10-02
+- name: npr_big_books_and_bold_ideas_with_kerri_miller
+  url: https://feeds.publicradio.org/public_feeds/mpr-news-with-kerri-miller
+  # Big Books & Bold Ideas with Kerri Miller — Minnesota Public Radio; latest 2026-10-02
+- name: npr_wild_card_with_rachel_martin
+  url: https://feeds.npr.org/510379/podcast.xml
+  # Wild Card with Rachel Martin — NPR; latest 2026-10-01
+- name: npr_trump_s_terms
+  url: https://feeds.npr.org/510374/podcast.xml
+  # Trump's Terms — NPR; latest 2026-10-01
+- name: npr_throughline
+  url: https://feeds.npr.org/510333/podcast.xml
+  # Throughline — NPR; latest 2026-10-01
+- name: npr_the_pulse
+  url: https://publicfeeds.net/f/12369/thepulse.xml
+  # The Pulse — WHYY; latest 2026-10-01
+- name: npr_sources_and_methods
+  url: https://feeds.npr.org/g-s1-84651/podcast.xml
+  # Sources & Methods — NPR; latest 2026-10-01
+- name: npr_sold_a_story
+  url: https://feeds.publicradio.org/public_feeds/sold-a-story
+  # Sold a Story — APM Reports; latest 2026-10-01
+- name: npr_snap_judgment
+  url: https://rss.pdrl.fm/9ba5b0/snap.feed.snapjudgment.org
+  # Snap Judgment — Snap Judgment and PRX; latest 2026-10-01
+- name: npr_ye_gods_with_scott_carter
+  url: https://publicfeeds.net/f/9501/feed-rss.xml
+  # Ye Gods With Scott Carter — NPR; latest 2026-09-30
+- name: npr_ear_hustle
+  url: https://feeds.earhustlesq.com/earhustlesq
+  # Ear Hustle — Ear Hustle & Radiotopia; latest 2026-09-30
+- name: npr_curious_city
+  url: https://curiouscity.podcasts.wbez.org
+  # Curious City — WBEZ Chicago; latest 2026-09-30
+- name: npr_alt_latino
+  url: https://feeds.npr.org/510305/podcast.xml
+  # Alt.Latino — NPR; latest 2026-09-30
+- name: npr_embedded
+  url: https://feeds.npr.org/510311/podcast.xml
+  # Embedded — NPR; latest 2026-09-29
+- name: npr_wisconsin_life
+  url: https://www.wpr.org/feeds/wisconsin-life/rss.xml
+  # Wisconsin Life — Wisconsin Public Radio; latest 2026-09-26
+- name: npr_npr_s_newsmakers
+  url: https://feeds.npr.org/g-s1-114952/podcast.xml
+  # NPR's Newsmakers — NPR; latest 2026-09-24
+- name: npr_brave_little_state
+  url: https://podcasts.vpr.net/brave-little-state
+  # Brave Little State — Vermont Public; latest 2026-09-24
+- name: npr_mindshift_podcast
+  url: https://feeds.megaphone.fm/KQINC5764600429
+  # MindShift Podcast — KQED; latest 2026-09-22
+- name: npr_radio_diaries
+  url: https://feed.radiodiaries.org/radio-diaries
+  # Radio Diaries — Radio Diaries & Radiotopia; latest 2026-09-17
+- name: npr_machine_gods
+  url: https://feeds.npr.org/g-s1-143588/podcast.xml
+  # Machine Gods — NPR; latest 2026-09-16
+- name: npr_your_turn_with_allison_aubrey
+  url: https://feeds.npr.org/g-s1-143389/podcast.xml
+  # Your Turn with Allison Aubrey — NPR; latest 2026-09-15
+- name: npr_planet_money_summer_school
+  url: https://feeds.npr.org/510362/podcast.xml
+  # Planet Money Summer School — NPR; latest 2026-08-26
+- name: npr_louder_than_a_riot
+  url: https://feeds.npr.org/510357/podcast.xml
+  # Louder Than A Riot — NPR; latest 2026-07-31
+- name: npr_no_compromise
+  url: https://feeds.npr.org/510356/podcast.xml
+  # No Compromise — NPR; latest 2026-07-22
+- name: npr_taking_cover
+  url: https://feeds.npr.org/510368/podcast.xml
+  # Taking Cover — NPR; latest 2026-07-21
+- name: npr_invisibilia
+  url: https://feeds.npr.org/510307/podcast.xml
+  # Invisibilia — NPR; latest 2026-07-18
+- name: npr_make_me_smart
+  url: https://feeds.publicradio.org/public_feeds/make-me-smart
+  # Make Me Smart — Marketplace; latest 2026-06-21
+- name: npr_how_wild
+  url: https://publicfeeds.net/f/16528/feed-rss.xml
+  # How Wild — NPR; latest 2026-06-11
+- name: npr_body_electric
+  url: https://feeds.npr.org/510375/podcast.xml
+  # Body Electric — NPR; latest 2026-05-05
+- name: npr_how_to_do_everything
+  url: https://feeds.npr.org/510384/podcast.xml
+  # How To Do Everything — NPR; latest 2026-04-29
+- name: npr_landslide
+  url: https://publicfeeds.net/f/16461/feed-rss.xml
+  # Landslide — NPR; latest 2026-04-28
+- name: npr_track_change
+  url: https://publicfeeds.net/f/16463/feed-rss.xml
+  # Track Change — NPR; latest 2026-02-10
+- name: npr_road_to_rickwood
+  url: https://publicfeeds.net/f/16527/feed-rss.xml
+  # Road to Rickwood — NPR; latest 2026-02-10
+- name: npr_inheriting
+  url: https://publicfeeds.net/f/16462/feed-rss.xml
+  # Inheriting — NPR; latest 2026-02-10
+- name: npr_bright_lit_place
+  url: https://publicfeeds.net/f/10127/feed-rss.xml
+  # Bright Lit Place — NPR; latest 2026-02-10
