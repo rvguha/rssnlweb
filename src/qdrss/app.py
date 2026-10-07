@@ -294,6 +294,7 @@ def create_app(services: Services) -> Starlette:
         return JSONResponse(
             {
                 "store": "cosmos" if services.cosmos else "sqlite",
+                "ranking_providers": getattr(services.ranker, "health", None) and services.ranker.health.report() or {},
                 "in_memory": services.memory.status if services.memory else {},
                 "items": await services.store.count(),
                 "index_built_at": services.ready_at.isoformat() if services.ready_at else None,
