@@ -107,32 +107,34 @@ class OpenRouter:
             extra_body={"reasoning": {"effort": "low"}, **({"provider": provider} if provider else {})},
         )
 
+    @staticmethod
+    def _parse(response) -> tuple[Any, str]:
+        """(decoded JSON, "") or (None, what is wrong with the reply)."""
+        choice = response.choices[0]
+        if not choice.message.content:
+            return None, f"an empty response (finish={choice.finish_reason})"
+        try:
+            return json.loads(choice.message.content), ""
+        except json.JSONDecodeError:
+            head = choice.message.content[:160].replace("\n", "\\n")
+            return None, f"malformed JSON ({len(choice.message.content)} chars, finish={choice.finish_reason}): {head!r}"
+
     async def structured(self, instruction: str, payload: dict[str, Any]) -> dict[str, Any]:
         response = await self._ranking_call(instruction, payload, [])
-        content = response.choices[0].message.content
-        if not content:
-            # A provider can end a call with finish_reason "error" and no content after the
-            # model has reasoned (seen with Groq's gpt-oss-20b). Temperature is 0, so the same
-            # provider fails the same way on every retry; the query then 503s for good. Try
-            # again with that provider excluded.
+        result, problem = self._parse(response)
+        if problem:
+            # A provider can end a call with no content (finish_reason "error", seen with Groq's
+            # gpt-oss-20b) or degenerate into junk until max_tokens (finish "length"). Temperature is 0,
+            # so the same provider fails the same way on every retry and the query 503s for good.
+            # Try again with that provider excluded.
             failed = getattr(response, "provider", None)
-            logger.warning(
-                "ranking call returned no content (finish=%s, provider=%s)%s",
-                response.choices[0].finish_reason, failed, "; retrying without it" if failed else "",
-            )
+            logger.warning("ranking call failed: %s (provider=%s)%s", problem, failed,
+                           "; retrying without it" if failed else "")
             if failed:
                 response = await self._ranking_call(instruction, payload, [failed])
-                content = response.choices[0].message.content
-        if not content:
-            raise RuntimeError("ranking model returned an empty response")
-        try:
-            result = json.loads(content)
-        except json.JSONDecodeError as exc:
-            head = content[:160].replace("\n", "\\n")
-            raise ValueError(
-                f"ranking model returned malformed JSON ({len(content)} chars, "
-                f"finish={response.choices[0].finish_reason}): {head!r}"
-            ) from exc
+                result, problem = self._parse(response)
+        if problem:
+            raise (RuntimeError if problem.startswith("an empty") else ValueError)(f"ranking model returned {problem}")
         if isinstance(result, list) and len(result) == 1 and isinstance(result[0], dict):
             result = result[0]
         if not isinstance(result, dict):

@@ -55,3 +55,16 @@ async def test_unknown_provider_cannot_be_excluded():
     with pytest.raises(RuntimeError, match="empty response"):
         await r.structured("i", {})
     assert len(r.client.calls) == 1
+
+
+async def test_provider_returning_malformed_json_is_excluded_on_retry():
+    # A model that degenerates into junk until max_tokens does it every time at temperature 0.
+    r = ranker([reply('{"final{"\n\n \t\n', finish="length", provider="Groq"), reply('{"results": []}', provider="Novita")])
+    assert await r.structured("i", {}) == {"results": []}
+    assert r.client.calls[1]["extra_body"]["provider"]["ignore"] == ["Groq"]
+
+
+async def test_still_malformed_after_the_retry_is_an_error():
+    r = ranker([reply("{", finish="length"), reply("{", finish="length", provider="Novita")])
+    with pytest.raises(ValueError, match="malformed JSON"):
+        await r.structured("i", {})
