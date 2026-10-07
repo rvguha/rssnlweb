@@ -19,6 +19,7 @@ from pathlib import Path
 import httpx
 import yaml
 
+from . import tal
 from .feeds import FeedError, next_page, parse_feed
 from .store import Store
 
@@ -35,6 +36,7 @@ class Source:
     name: str
     url: str
     collection: str = "default"
+    segmenter: str = ""  # "tal": store each episode as passages with audio offsets instead of one item
 
 
 @dataclass
@@ -60,7 +62,10 @@ def load_sources(path: Path) -> list[Source]:
         for entry in entries or []:
             if not isinstance(entry, dict) or "name" not in entry or "url" not in entry:
                 raise ValueError(f"{path}: each source needs name and url, got {entry!r}")
-            sources.append(Source(str(entry["name"]), str(entry["url"]), str(collection)))
+            segmenter = str(entry.get("segmenter", ""))
+            if segmenter not in ("", "tal"):
+                raise ValueError(f"{path}: unknown segmenter {segmenter!r} for {entry['name']}")
+            sources.append(Source(str(entry["name"]), str(entry["url"]), str(collection), segmenter))
     names = [s.name for s in sources]
     if len(set(names)) != len(names):
         raise ValueError(f"{path}: duplicate source names")
@@ -124,7 +129,12 @@ async def _fetch_one(
     # Parsing a 50 MB feed is seconds of CPU; keep it off the event loop so
     # feed fetches being served meanwhile are not stalled.
     try:
-        items = _tag(await asyncio.to_thread(parse_feed, body, source.name, datetime.now(UTC)), source)
+        if source.segmenter == "tal":
+            # Parse first so a malformed body is rejected before any transcript is fetched.
+            await asyncio.to_thread(parse_feed, body, source.name, datetime.now(UTC))
+            items = _tag(await tal.expand(body, source.name, source.collection, client, limit), source)
+        else:
+            items = _tag(await asyncio.to_thread(parse_feed, body, source.name, datetime.now(UTC)), source)
     except FeedError as exc:
         return await _failed(store, source, str(exc))
 

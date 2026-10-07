@@ -188,7 +188,7 @@ class CosmosStore:
             params.append({"name": "@collection", "value": collection})
         query = (
             "SELECT TOP @k c.item_id, c.source, c.source_title, c.url, c.title, c.snippet, "
-            "c.published_at, c.published_raw, c.ingested_at, c.collection, "
+            "c.published_at, c.published_raw, c.ingested_at, c.collection, c.extra, "
             "VectorDistance(c.embedding, @v) AS score "
             f"FROM c WHERE {' AND '.join(clauses)} "
             "ORDER BY VectorDistance(c.embedding, @v)"
@@ -289,6 +289,8 @@ def _document(item: Item, vector: np.ndarray | None = None, model: str | None = 
         "ingested_at": item.ingested_at.isoformat(),
         "ingested_ts": item.ingested_at.timestamp(),
     }
+    if item.extra:
+        doc["extra"] = item.extra
     if vector is not None:
         doc["embedding"] = [float(x) for x in vector]
         doc["embedding_model"] = model
@@ -307,4 +309,5 @@ def _item(row: dict[str, Any]) -> Item:
         published_raw=row.get("published_raw", ""),
         ingested_at=datetime.fromisoformat(row["ingested_at"]),
         collection=row.get("collection", ""),
+        extra=row.get("extra", ""),
     )
