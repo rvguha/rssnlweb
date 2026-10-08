@@ -173,3 +173,53 @@ def test_expand_skips_an_episode_without_a_transcript():
     items = asyncio.run(run())
     assert items and {json.loads(i.extra)["episode"] for i in items} == {899}
     assert json.loads(items[0].extra)["audio"].startswith("https://feed/899.mp3#t=")      # the feed's audio is preferred
+
+
+# ---- the Internet Archive fallback for a transcript page the site cannot serve ----
+
+
+TIMED = '<html><title>79: Stuck in the Wrong Decade - This American Life</title><p data-timestamp="12">Hello.</p></html>'
+
+
+def site_and_archive(live_status, captures, archived_pages):
+    """A fake client: the live transcript page answers `live_status`; the archive lists `captures` and serves `archived_pages`."""
+    calls = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        url = str(request.url)
+        calls.append(url)
+        if url.startswith("https://www.thisamericanlife.org/79/transcript"):
+            return httpx.Response(live_status, text="Be right back")
+        if "/cdx/search/cdx" in url:
+            return httpx.Response(200, json=[["timestamp"]] + [[c] for c in captures])
+        for stamp, body in archived_pages.items():
+            if f"/web/{stamp}id_/" in url:
+                return httpx.Response(200, text=body)
+        return httpx.Response(404, text="not found")
+
+    return httpx.AsyncClient(transport=httpx.MockTransport(handler)), calls
+
+
+async def test_a_transcript_page_that_always_errors_is_taken_from_the_archive():
+    # Newest capture is an error page the archive recorded as 200; the one before it has the transcript.
+    client, calls = site_and_archive(500, ["20230101000000", "20251229171517"],
+                                     {"20251229171517": "<html>Be right back</html>", "20230101000000": TIMED})
+    got = await tal.fetch_pages(79, client)
+    assert got is not None and 'data-timestamp="12"' in got[0]
+    assert [c for c in calls if "/web/" in c][0].find("20251229171517") > 0          # newest capture tried first
+
+
+async def test_throttling_is_not_sent_to_the_archive():
+    client, calls = site_and_archive(429, ["20230101000000"], {"20230101000000": TIMED})
+    with pytest.raises(httpx.HTTPStatusError):
+        await tal.fetch_pages(79, client)
+    assert not [c for c in calls if "web.archive.org" in c]
+
+
+async def test_when_the_archive_has_nothing_the_server_error_still_raises_so_the_caller_retries():
+    client, _ = site_and_archive(500, ["20251229171517"], {"20251229171517": "<html>Be right back</html>"})
+    with pytest.raises(httpx.HTTPStatusError):
+        await tal.fetch_pages(79, client)
+    empty, _ = site_and_archive(503, [], {})
+    with pytest.raises(httpx.HTTPStatusError):
+        await tal.fetch_pages(79, empty)
