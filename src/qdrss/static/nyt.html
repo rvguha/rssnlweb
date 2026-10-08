@@ -20,8 +20,10 @@
   button:disabled { opacity: .6; cursor: wait; }
   button.ghost { background: transparent; color: var(--accent); padding: 6px 12px; }
   label.check { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); cursor: pointer; }
-  #examples { display: flex; flex-wrap: wrap; gap: 6px; }
-  #examples button { background: var(--tag); color: var(--accent); border: 0; border-radius: 999px; padding: 4px 12px; font-size: 13px; }
+  #examples { display: grid; gap: 14px; margin-top: 4px; }
+  #examples h2 { margin: 0 0 6px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips button { background: var(--tag); color: var(--accent); border: 0; border-radius: 999px; padding: 4px 12px; font-size: 13px; }
   #feed { display: none; margin-top: 24px; }
   #feed code { display: block; padding: 10px; border: 1px solid var(--line); border-radius: 8px; word-break: break-all; font-size: 13px; }
   .row { display: flex; gap: 12px; align-items: center; margin-top: 8px; font-size: 14px; color: var(--muted); }
@@ -62,25 +64,96 @@
 <footer>Feeds link to each episode's page; they work in RSS readers (Feedly, NetNewsWire, Reeder), not as playable podcasts. More topics and collections at <a href="/?collection=nytimes">rss.neuralweb.dev</a>.</footer>
 
 <script>
-// Each returned 4-6 of the hand-checked episodes across 5-7 shows (2026-10-02).
-const EXAMPLES = [
-  'ChatGPT and AI chatbots',
-  "Phones, social media and teenagers' mental health",
-  'Ozempic and the new weight-loss drugs',
-  'Elon Musk',
-  'Abortion politics after the Dobbs decision',
-];
+// Each returned at least 6 episodes from at least 3 shows, at least 4 of them strong matches, against the full archive (checked 2026-10-08).
+const EXAMPLES = {
+  "Politics and government": [
+    "The Supreme Court and presidential power",
+    "Immigration and border enforcement",
+    "Tariffs and trade wars",
+    "Gerrymandering and redistricting",
+    "Gun violence and gun laws",
+    "The investigations into January 6",
+    "Voting rights and election security",
+    "Abortion politics after the Dobbs decision",
+    "The Democratic Party's identity crisis",
+  ],
+  "The world": [
+    "The war in Ukraine",
+    "Israel and Gaza",
+    "Iran and its nuclear program",
+    "Vladimir Putin and Russia",
+    "Climate summits and global climate diplomacy",
+    "The Syrian civil war and its aftermath",
+    "Venezuela and its migration crisis",
+    "NATO and Europe's defense",
+  ],
+  "Technology": [
+    "ChatGPT and AI chatbots",
+    "Artificial intelligence and jobs",
+    "Phones, social media and teenagers' mental health",
+    "TikTok and the fight over banning it",
+    "Elon Musk",
+    "Bitcoin and cryptocurrency",
+    "Privacy and surveillance",
+    "Antitrust cases against Big Tech",
+    "Misinformation and deepfakes",
+  ],
+  "Health and science": [
+    "Ozempic and the new weight-loss drugs",
+    "Long Covid",
+    "Psychedelics as medicine",
+    "The opioid epidemic",
+    "Loneliness and mental health",
+    "Extreme weather and climate change",
+    "Mars and space exploration",
+    "Vaccines and public trust",
+  ],
+  "Money and work": [
+    "Inflation and the cost of living",
+    "The housing affordability crisis",
+    "The Federal Reserve and interest rates",
+    "Private equity and Wall Street",
+    "Student loan debt",
+    "Labor unions and strikes",
+    "Homelessness in American cities",
+    "Retirement and aging",
+  ],
+  "Culture and society": [
+    "Race and policing",
+    "Free speech on college campuses",
+    "College admissions and affirmative action",
+    "Hollywood and the streaming wars",
+    "Taylor Swift",
+    "Sports betting",
+    "The Olympics",
+    "Dating in the app era",
+    "Diets, food and nutrition",
+    "The decline of local news",
+    "Reading, books and attention spans",
+  ],
+};
 // Archived episodes are stamped with their publication date; reaching them
 // means a far-back since.
 const ARCHIVE_SINCE = '2000-01-01';
 const $ = id => document.getElementById(id);
 
-for (const q of EXAMPLES) {
-  const b = document.createElement('button');
-  b.type = 'button';
-  b.textContent = q;
-  b.addEventListener('click', () => { $('q').value = q; $('form').requestSubmit(); });
-  $('examples').append(b);
+for (const [name, topics] of Object.entries(EXAMPLES)) {
+  const group = document.createElement('div');
+  group.className = 'group';
+  const title = document.createElement('h2');
+  title.textContent = name;
+  group.append(title);
+  const chips = document.createElement('div');
+  chips.className = 'chips';
+  for (const q of topics) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = q;
+    b.addEventListener('click', () => { $('q').value = q; $('form').requestSubmit(); });
+    chips.append(b);
+  }
+  group.append(chips);
+  $('examples').append(group);
 }
 
 function feedUrl() {
