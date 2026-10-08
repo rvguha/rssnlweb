@@ -12,8 +12,10 @@ One call pair per episode recovers it, from the newest episode down to #1.
 - Pages are cached under data/tal_cache, so a rerun fetches only what is missing. Requests are spaced out: it is
   a few thousand pages from a small non-profit's site, fetched once.
 - Episodes without a timed transcript are listed and skipped.
+- A transcript page the site answers with a server error every time is taken from the Internet Archive's newest capture that
+  carries the timed transcript (qdrss.tal.archived_transcript); episodes 57, 79, 86 and 375 were recovered this way.
 
-    .venv/bin/python scripts/backfill_tal.py [--first 1] [--last 899] [--workers 3]
+    .venv/bin/python scripts/backfill_tal.py [--first 1] [--last 899] [--workers 3] [--episodes 57,79,86,375]
 
 Run it again after a failure: cached episodes are skipped and the stored ones are not duplicated.
 """
@@ -64,6 +66,7 @@ async def main() -> None:
     parser.add_argument("--first", type=int, default=1)
     parser.add_argument("--last", type=int, default=0, help="newest episode; default: the newest in the feed")
     parser.add_argument("--workers", type=int, default=3)
+    parser.add_argument("--episodes", help="comma-separated episode numbers to fetch instead of the whole --first/--last range")
     args = parser.parse_args()
     load_dotenv()
     logging.basicConfig(level=logging.WARNING)
@@ -101,7 +104,8 @@ async def main() -> None:
             return await store.insert_missing(items)
 
         try:
-            numbers = list(range(last, args.first - 1, -1))
+            numbers = (sorted({int(n) for n in args.episodes.split(",")}, reverse=True) if args.episodes
+                       else list(range(last, args.first - 1, -1)))
             for start in range(0, len(numbers), 50):
                 added += sum(await asyncio.gather(*(one(n) for n in numbers[start:start + 50])))
                 print(f"{done}/{len(numbers)} episodes; {added} passages stored; {len(missing)} without a transcript", flush=True)

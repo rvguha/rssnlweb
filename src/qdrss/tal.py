@@ -204,12 +204,46 @@ async def _get(client: httpx.AsyncClient, url: str, **kwargs) -> httpx.Response:
     return response
 
 
+ARCHIVE = "https://web.archive.org"
+ARCHIVE_TRIES = 8        # captures looked at, newest first
+
+
+async def archived_transcript(number: int, client: httpx.AsyncClient) -> str | None:
+    """The newest Internet Archive capture of an episode's transcript page that carries the timed transcript, or None.
+    A capture can itself be an error page that the Archive recorded as a 200, so each is checked for the timestamps."""
+    try:
+        listing = await client.get(f"{ARCHIVE}/cdx/search/cdx", params={
+            "url": f"thisamericanlife.org/{number}/transcript", "output": "json", "fl": "timestamp", "filter": "statuscode:200",
+            "limit": f"-{ARCHIVE_TRIES}"})
+        stamps = [row[0] for row in listing.json()[1:]] if listing.status_code == 200 else []
+    except (httpx.HTTPError, ValueError):
+        return None
+    for stamp in reversed(stamps):
+        try:
+            capture = await client.get(f"{ARCHIVE}/web/{stamp}id_/{SITE}/{number}/transcript")
+        except httpx.HTTPError:
+            continue
+        if capture.status_code == 200 and 'data-timestamp="' in capture.text:
+            logger.info("episode %d: transcript from the Internet Archive capture of %s", number, stamp)
+            return capture.text
+    return None
+
+
 async def fetch_pages(number: int, client: httpx.AsyncClient, *, feed_audio: str = "") -> tuple[str, str, str] | None:
     """(transcript page, episode page, audio URL) for one episode, or None when the site has no timed transcript.
     The episode page is found by the transcript's link to it, else by the address its title implies ("/824/family-meeting"
     redirects to "/family-meeting"). The audio is the feed's, else the page's, else the site's standard address when a
-    one-byte range request shows it serves audio (the recent "clean" and "archive" locations). Throttling and server errors raise; a missing page is just empty."""
-    response = await _get(client, f"{SITE}/{number}/transcript")
+    one-byte range request shows it serves audio (the recent "clean" and "archive" locations). Throttling raises; a server error raises unless the
+    Internet Archive holds a capture of the transcript; a missing page is just empty."""
+    try:
+        response = await _get(client, f"{SITE}/{number}/transcript")
+    except httpx.HTTPStatusError as error:
+        # A page that answers 5xx every time is broken on the site's side (episodes 57, 79, 86 and 375 do, though their episode pages
+        # link to a transcript); throttling (429) is not, and is left to the caller's retry.
+        archived = await archived_transcript(number, client) if error.response.status_code >= 500 else None
+        if archived is None:
+            raise
+        response = httpx.Response(200, text=archived, request=error.request)
     if response.status_code != 200 or 'data-timestamp="' not in response.text:
         return None
     transcript = response.text
