@@ -6,6 +6,8 @@ import hashlib
 import json
 import logging
 import re
+import time
+from collections import deque
 from typing import Any, Protocol
 
 import numpy as np
@@ -64,6 +66,51 @@ class KeywordRanker:
         return {"results": results}
 
 
+class ProviderHealth:
+    """Which OpenRouter providers have been failing lately, remembered for this process.
+
+    A call counts as a failure when the provider returned nothing or unparseable JSON. A provider with at least
+    `min_failures` failures in the last `window` seconds, making up at least `max_share` of its calls in that time,
+    is avoided: it is added to the ignore list of new calls. The record ages out, so a provider is tried again once
+    its failures are old enough, and one that is still bad is dropped again after a few more.
+    """
+
+    def __init__(self, window: float = 3600, min_failures: int = 3, max_share: float = 0.3, clock=time.time):
+        self.window, self.min_failures, self.max_share, self.clock = window, min_failures, max_share, clock
+        self.events: dict[str, deque[tuple[float, bool]]] = {}
+        self.last_problem: dict[str, str] = {}
+
+    def record(self, provider: str | None, ok: bool, *, problem: str = "") -> None:
+        if provider:
+            self.events.setdefault(provider, deque()).append((self.clock(), ok))
+            if not ok:
+                self.last_problem[provider] = problem[:200]
+
+    def _recent(self, provider: str) -> list[bool]:
+        events = self.events.get(provider, deque())
+        while events and events[0][0] < self.clock() - self.window:
+            events.popleft()
+        return [ok for _, ok in events]
+
+    def avoid(self) -> list[str]:
+        out = []
+        for provider in list(self.events):
+            recent = self._recent(provider)
+            failures = recent.count(False)
+            if failures >= self.min_failures and failures / len(recent) >= self.max_share:
+                out.append(provider)
+        return sorted(out)
+
+    def report(self) -> dict:
+        rows = {}
+        for provider in sorted(self.events):
+            recent = self._recent(provider)
+            if recent:
+                rows[provider] = {"calls": len(recent), "failures": recent.count(False),
+                                  "avoided": provider in self.avoid(), "last_problem": self.last_problem.get(provider, "")}
+        return rows
+
+
 class OpenRouter:
     def __init__(
         self,
@@ -79,6 +126,7 @@ class OpenRouter:
         self.provider_sort = provider_sort
         self.model = f"openrouter:{embedding_model}"
         self.embedding_model = embedding_model
+        self.health = ProviderHealth()
 
     async def embed(self, texts: list[str]) -> np.ndarray:
         response = await self.client.embeddings.create(model=self.embedding_model, input=texts)
@@ -90,8 +138,14 @@ class OpenRouter:
         provider: dict[str, Any] = {}
         if self.provider_sort:
             provider["sort"] = self.provider_sort
+        avoided = [p for p in self.health.avoid() if p not in ignore]
+        if avoided:
+            provider["ignore"] = avoided
         if ignore:
-            provider["ignore"] = ignore
+            # A retry: skip the provider that failed, and take only providers that support every
+            # parameter sent (json_object output), so the second try is a more capable one.
+            provider["ignore"] = sorted({*ignore, *avoided})
+            provider["require_parameters"] = True
         return await self.client.chat.completions.create(
             model=self.ranking_model,
             messages=[
@@ -107,32 +161,36 @@ class OpenRouter:
             extra_body={"reasoning": {"effort": "low"}, **({"provider": provider} if provider else {})},
         )
 
+    @staticmethod
+    def _parse(response) -> tuple[Any, str]:
+        """(decoded JSON, "") or (None, what is wrong with the reply)."""
+        choice = response.choices[0]
+        if not choice.message.content:
+            return None, f"an empty response (finish={choice.finish_reason})"
+        try:
+            return json.loads(choice.message.content), ""
+        except json.JSONDecodeError:
+            head = choice.message.content[:160].replace("\n", "\\n")
+            return None, f"malformed JSON ({len(choice.message.content)} chars, finish={choice.finish_reason}): {head!r}"
+
     async def structured(self, instruction: str, payload: dict[str, Any]) -> dict[str, Any]:
         response = await self._ranking_call(instruction, payload, [])
-        content = response.choices[0].message.content
-        if not content:
-            # A provider can end a call with finish_reason "error" and no content after the
-            # model has reasoned (seen with Groq's gpt-oss-20b). Temperature is 0, so the same
-            # provider fails the same way on every retry; the query then 503s for good. Try
-            # again with that provider excluded.
+        result, problem = self._parse(response)
+        self.health.record(getattr(response, "provider", None), not problem, problem=problem)
+        if problem:
+            # A provider can end a call with no content (finish_reason "error", seen with Groq's
+            # gpt-oss-20b) or degenerate into junk until max_tokens (finish "length"). Temperature is 0,
+            # so the same provider fails the same way on every retry and the query 503s for good.
+            # Try again with that provider excluded.
             failed = getattr(response, "provider", None)
-            logger.warning(
-                "ranking call returned no content (finish=%s, provider=%s)%s",
-                response.choices[0].finish_reason, failed, "; retrying without it" if failed else "",
-            )
+            logger.warning("ranking call failed: %s (provider=%s)%s", problem, failed,
+                           "; retrying without it" if failed else "")
             if failed:
                 response = await self._ranking_call(instruction, payload, [failed])
-                content = response.choices[0].message.content
-        if not content:
-            raise RuntimeError("ranking model returned an empty response")
-        try:
-            result = json.loads(content)
-        except json.JSONDecodeError as exc:
-            head = content[:160].replace("\n", "\\n")
-            raise ValueError(
-                f"ranking model returned malformed JSON ({len(content)} chars, "
-                f"finish={response.choices[0].finish_reason}): {head!r}"
-            ) from exc
+                result, problem = self._parse(response)
+                self.health.record(getattr(response, "provider", None), not problem, problem=problem)
+        if problem:
+            raise (RuntimeError if problem.startswith("an empty") else ValueError)(f"ranking model returned {problem}")
         if isinstance(result, list) and len(result) == 1 and isinstance(result[0], dict):
             result = result[0]
         if not isinstance(result, dict):

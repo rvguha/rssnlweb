@@ -29,6 +29,8 @@ class Config:
     cosmos_key: str
     cosmos_database: str
     ingest_in_app: bool
+    memory_collections: tuple[str, ...] = ()
+    memory_snapshot: str = ""
 
     @property
     def db_path(self) -> Path:
@@ -59,4 +61,6 @@ def load_config() -> Config:
         cosmos_key=env.get("COSMOS_KEY", ""),
         cosmos_database=env.get("COSMOS_DATABASE", "qdrss"),
         ingest_in_app=env.get("QDRSS_INGEST_IN_APP", "true").lower() in ("1", "true", "yes"),
+        memory_collections=tuple(c for c in env.get("QDRSS_MEMORY_COLLECTIONS", "").split(",") if c.strip()),
+        memory_snapshot=env.get("QDRSS_MEMORY_SNAPSHOT", ""),
     )
