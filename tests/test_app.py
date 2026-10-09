@@ -133,6 +133,7 @@ async def test_health_reports_what_the_service_has_been_doing(tmp_path):
     with TestClient(app) as client:
         before = client.get("/health").json()
         assert before["service"] == "qdrss"
+        assert client.get("/health").headers["access-control-allow-origin"] == "*"
         assert before["status"] == "ok"
         assert before["feed_requests"]["total"] == 0
         assert before["feed_requests"]["last_at"] is None

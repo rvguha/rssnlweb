@@ -310,7 +310,7 @@ def create_app(services: Services) -> Starlette:
         fetched = [s["last_fetch"] for s in sources if s.get("last_fetch")]
         problems = (["index not built"] if not services.ready_at else []) + (
             [f"{len(failing)} of {len(sources)} sources failed their last fetch"] if sources and len(failing) / len(sources) > 0.2 else [])
-        return JSONResponse(
+        return JSONResponse(headers={"access-control-allow-origin": "*"}, content=
             {
                 "status": "ok" if not problems else "degraded",
                 **({"degraded_because": problems} if problems else {}),
