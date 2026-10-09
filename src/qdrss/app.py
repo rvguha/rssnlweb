@@ -4,6 +4,7 @@ import asyncio
 import contextlib
 import hashlib
 import logging
+import os
 import re
 import sys
 import time
@@ -20,6 +21,7 @@ from starlette.routing import Route
 # Pages change with each deploy; without this browsers reuse a stale copy.
 NO_CACHE = {"cache-control": "no-cache"}
 
+from .activity import Activity, iso
 from .config import Config, load_config
 from .feed import FeedRequest, Retriever, evaluate, render_rss
 from .feeds import parse_date
@@ -45,6 +47,7 @@ class Services:
         self.config = config
         self.embedder = embedder
         self.ranker = ranker
+        self.activity = Activity()
         self.sources = load_sources(config.sources_path)
         self.collections = {s.name: s.collection for s in self.sources}
         self.cosmos = bool(config.cosmos_endpoint)
@@ -219,6 +222,17 @@ def _feed_response(request: Request, body: bytes, etag: str) -> Response:
 
 def create_app(services: Services) -> Starlette:
     async def feed(request: Request) -> Response:
+        started = time.monotonic()
+        try:
+            response = await _feed(request)
+        except Exception as exc:
+            services.activity.record(500, time.monotonic() - started, f"{type(exc).__name__}: {exc}")
+            raise
+        services.activity.record(response.status_code, time.monotonic() - started,
+                                 bytes(response.body).decode("utf-8", "replace") if response.status_code >= 500 else None)
+        return response
+
+    async def _feed(request: Request) -> Response:
         params = request.query_params
         q = params.get("q", "").strip()
         if not q:
@@ -291,15 +305,30 @@ def create_app(services: Services) -> Starlette:
         return JSONResponse(await services.collection_counts())
 
     async def health(_: Request) -> Response:
-        return JSONResponse(
+        sources = await services.store.all_sources()
+        failing = [s["name"] for s in sources if s.get("last_error")]
+        fetched = [s["last_fetch"] for s in sources if s.get("last_fetch")]
+        problems = (["index not built"] if not services.ready_at else []) + (
+            [f"{len(failing)} of {len(sources)} sources failed their last fetch"] if sources and len(failing) / len(sources) > 0.2 else [])
+        return JSONResponse(headers={"access-control-allow-origin": "*"}, content=
             {
+                "status": "ok" if not problems else "degraded",
+                **({"degraded_because": problems} if problems else {}),
+                "service": "qdrss",
+                "revision": os.getenv("K_REVISION") or None,
+                "started_at": iso(services.activity.started),
+                "uptime_seconds": int(time.time() - services.activity.started),
+                "feed_requests": services.activity.snapshot(),
+                "sources_summary": {"total": len(sources), "failing": len(failing), "failing_names": failing[:20],
+                                    "last_fetch_at": max(fetched) if fetched else None},
+                "note": "Request counters are for this instance since it started; a restart resets them and several instances each count their own.",
                 "store": "cosmos" if services.cosmos else "sqlite",
                 "ranking_providers": getattr(services.ranker, "health", None) and services.ranker.health.report() or {},
                 "in_memory": services.memory.status if services.memory else {},
                 "items": await services.store.count(),
                 "index_built_at": services.ready_at.isoformat() if services.ready_at else None,
                 "last_refresh": services.last_refresh,
-                "sources": await services.store.all_sources(),
+                "sources": sources,
             }
         )
 
@@ -321,6 +350,7 @@ def create_app(services: Services) -> Starlette:
             Route("/feed.xml", feed),
             Route("/collections", collections),
             Route("/health", health),
+            Route("/healthz", health),
         ],
         lifespan=lifespan,
     )
