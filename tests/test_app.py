@@ -120,3 +120,61 @@ async def test_503_before_index_and_on_ranker_failure(tmp_path):
     with TestClient(app) as client:
         r = client.get("/feed.xml?q=rust&since=2020-01-01T00:00:00Z")
         assert r.status_code == 503 and b"ranking unavailable" in r.content
+
+
+async def test_health_reports_what_the_service_has_been_doing(tmp_path):
+    services = make_services(tmp_path)
+    await services.store.insert_missing([make_item("1", "rust release", "rust", ingested=NOW - timedelta(days=1))])
+    services.index = await build_index(services.store, services.embedder, services.collections)
+    services.ready_at = NOW
+    app = create_app(services)
+    services.start = lambda: None
+
+    with TestClient(app) as client:
+        before = client.get("/health").json()
+        assert before["service"] == "qdrss"
+        assert before["status"] == "ok"
+        assert before["feed_requests"]["total"] == 0
+        assert before["feed_requests"]["last_at"] is None
+
+        assert client.get("/feed.xml", params={"q": "rust", "since": (NOW - timedelta(days=7)).isoformat()}).status_code == 200
+        assert client.get("/feed.xml").status_code == 400
+
+        after = client.get("/healthz").json()               # the same document at both paths
+        seen = after["feed_requests"]
+        assert seen["total"] == 2
+        assert seen["by_status"] == {"200": 1, "400": 1}
+        assert seen["last_at"] is not None and seen["seconds_since_last"] >= 0
+        assert seen["latency_seconds"]["sampled"] == 2
+        assert after["sources_summary"]["total"] == len(after["sources"])
+        assert "uptime_seconds" in after and "started_at" in after
+
+
+async def test_health_is_degraded_before_the_index_is_built(tmp_path):
+    services = make_services(tmp_path)
+    app = create_app(services)
+    services.start = lambda: None
+    with TestClient(app) as client:
+        d = client.get("/health").json()
+        assert d["status"] == "degraded"
+        assert "index not built" in d["degraded_because"]
+
+
+async def test_a_failed_ranking_is_counted_as_a_server_error(tmp_path):
+    from qdrss.rank import RankingError
+
+    class Broken(KeywordRanker):
+        async def classify_batch(self, *a, **k):
+            raise RankingError("down")
+
+    services = make_services(tmp_path)
+    await services.store.insert_missing([make_item("1", "rust release", "rust", ingested=NOW - timedelta(days=1))])
+    services.index = await build_index(services.store, services.embedder, services.collections)
+    services.ready_at = NOW
+    services.activity.record(503, 0.2, "ranking unavailable: down")
+    app = create_app(services)
+    services.start = lambda: None
+    with TestClient(app) as client:
+        seen = client.get("/health").json()["feed_requests"]
+        assert seen["server_errors"] == 1
+        assert seen["last_error"] == "ranking unavailable: down"
