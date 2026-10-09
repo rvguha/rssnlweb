@@ -20,8 +20,10 @@
   button:disabled { opacity: .6; cursor: wait; }
   button.ghost { background: transparent; color: var(--accent); padding: 6px 12px; }
   label.check { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); cursor: pointer; }
-  #examples { display: flex; flex-wrap: wrap; gap: 6px; }
-  #examples button { background: var(--tag); color: var(--accent); border: 0; border-radius: 999px; padding: 4px 12px; font-size: 13px; }
+  #examples { display: grid; gap: 14px; margin-top: 4px; }
+  #examples h2 { margin: 0 0 6px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips button { background: var(--tag); color: var(--accent); border: 0; border-radius: 16px; padding: 4px 12px; font-size: 13px; text-align: left; max-width: 100%; }
   #feed { display: none; margin-top: 24px; }
   #feed code { display: block; padding: 10px; border: 1px solid var(--line); border-radius: 8px; word-break: break-all; font-size: 13px; }
   .row { display: flex; gap: 12px; align-items: center; margin-top: 8px; font-size: 14px; color: var(--muted); }
@@ -62,25 +64,99 @@
 <footer>Feeds link to each episode's page; they work in RSS readers (Feedly, NetNewsWire, Reeder), not as playable podcasts. More topics and collections at <a href="/?collection=npr">rss.neuralweb.dev</a>.</footer>
 
 <script>
-// Each returned 30-39 episodes across 11-21 shows against the full npr corpus (2026-10-07).
-const EXAMPLES = [
-  'The economics of housing, rent and the cost of living',
-  'Immigration policy and the debate over deportations',
-  'Artificial intelligence and the future of work',
-  'The Supreme Court and its major rulings',
-  'How climate change is reshaping cities and communities',
-];
+// A feed follows a continuing interest, so each group starts broad and narrows to a specialized beat that keeps producing episodes.
+// Every example returned at least 5 episodes, most of them judged relevant (checked 2026-10-09).
+const EXAMPLES = {
+  "Politics and government": [
+    "The Supreme Court and its major rulings",
+    "Immigration policy and the debate over deportations",
+    "Congress and the fight over federal spending, the debt ceiling and government shutdowns",
+    "Voting rights, redistricting and the fight over how elections are run",
+    "How presidents use executive power and where the courts draw the line",
+    "Mass deportation operations, immigration detention and the legal challenges to them",
+    "The state-by-state patchwork of abortion laws and what it means for doctors and patients",
+    "How local governments are handling budget cuts, policing and public services",
+  ],
+  "The world": [
+    "The war in Ukraine",
+    "The Israel-Hamas war and the humanitarian crisis in Gaza",
+    "Iran's nuclear program, sanctions and the risk of a wider war",
+    "China's economy, its rivalry with the United States and the future of Taiwan",
+    "Latin America: migration, cartels and the politics of Mexico, Venezuela and Brazil",
+    "How Russia's war on Ukraine has affected ordinary Ukrainians, refugees and the front-line towns",
+    "Africa: elections, conflicts and economies across the continent",
+  ],
+  "Science and technology": [
+    "Space exploration: NASA, SpaceX and the search for life elsewhere",
+    "Privacy, surveillance and big tech's use of our data",
+    "ChatGPT, chatbots and how people are using A.I. in everyday life",
+    "Cryptocurrency, its collapses and its regulation",
+    "The race to build electric cars and batteries",
+    "Social media's effect on teenagers: research on mental health, school phone bans and lawsuits against platforms",
+  ],
+  "Money and work": [
+    "The economics of housing, rent and the cost of living",
+    "Inflation, interest rates and the Federal Reserve",
+    "The labor market: layoffs, hiring, unions and the future of work",
+    "Student loan debt and the cost of college",
+    "How grocery prices, supply chains and shipping affect what we buy",
+    "Tariffs, supply chains and how trade policy is changing prices for shoppers and small businesses",
+    "The housing shortage: zoning reform, homebuilding and why rents keep rising",
+    "Retirement savings, Social Security and aging in America",
+  ],
+  "Climate and the environment": [
+    "How climate change is reshaping cities and communities",
+    "Extreme weather: hurricanes, wildfires and floods and how people recover",
+    "Renewable energy, solar power and the future of the electric grid",
+    "Wildlife, extinction and efforts to protect endangered species",
+    "The ocean, coral reefs and what warming seas are doing",
+    "Water shortages, drought and the Colorado River",
+    "Wildfire seasons: what drives them, the smoke, and how communities rebuild",
+    "Climate adaptation: how coastal cities and towns are preparing for rising seas",
+  ],
+  "Health": [
+    "Public health: vaccines, measles and trust in medicine",
+    "Mental health, addiction and the opioid crisis",
+    "The healthcare system: insurance, hospital bills and Medicaid",
+    "Cancer research and new treatments",
+    "Medicaid cuts, hospital closures and rural health care",
+    "Long Covid, vaccines and how the public health system is changing after the pandemic",
+    "The overdose crisis: fentanyl, naloxone and what communities are trying",
+    "Loneliness, friendship and how people connect",
+  ],
+  "Culture and society": [
+    "Books, authors and the state of reading",
+    "Poetry, novels and the books everyone is talking about this year",
+    "Music, pop stars and what the streaming era did to artists",
+    "Television and movies: prestige TV, streaming and the Oscars",
+    "The Olympics, athletes and the business of international sport",
+    "Religion in America: churches, politics and the rise of the nones",
+    "Racism, policing and the push for police reform",
+    "Immigrant families: stories of people building lives in a new country",
+  ],
+};
 // Archived episodes are stamped with their publication date; reaching them
 // means a far-back since.
 const ARCHIVE_SINCE = '2000-01-01';
 const $ = id => document.getElementById(id);
 
-for (const q of EXAMPLES) {
-  const b = document.createElement('button');
-  b.type = 'button';
-  b.textContent = q;
-  b.addEventListener('click', () => { $('q').value = q; $('form').requestSubmit(); });
-  $('examples').append(b);
+for (const [name, topics] of Object.entries(EXAMPLES)) {
+  const group = document.createElement('div');
+  group.className = 'group';
+  const title = document.createElement('h2');
+  title.textContent = name;
+  group.append(title);
+  const chips = document.createElement('div');
+  chips.className = 'chips';
+  for (const q of topics) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = q;
+    b.addEventListener('click', () => { $('q').value = q; $('form').requestSubmit(); });
+    chips.append(b);
+  }
+  group.append(chips);
+  $('examples').append(group);
 }
 
 function feedUrl() {
