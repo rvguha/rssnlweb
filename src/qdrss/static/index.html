@@ -45,6 +45,10 @@
 
   .topnav { text-align: right; font-size: 13px; margin: 0 0 14px; }
   .topnav a { color: var(--accent, #3b5ccc); }
+  #examples[hidden], #picked[hidden] { display: none; }
+  #picked { display: flex; gap: 10px; align-items: center; min-width: 0; }
+  #picked .ptxt { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--accent); background: var(--tag); border-radius: 16px; padding: 4px 12px; font-size: 13px; }
+  #picked button { flex: none; background: transparent; color: var(--accent); border: 1px solid var(--accent); border-radius: 8px; padding: 4px 10px; font-size: 13px; }
 </style>
 </head>
 <body>
@@ -185,13 +189,26 @@ const EXAMPLES = {
         'AI, autonomy and the future of command and control on the battlefield',
         'What commanders learned from World War II campaigns that still shapes strategy today'],
 };
+// Choosing a sample folds the samples into one line above the answer; "Show examples" opens them again.
+const pickedBar = (() => {
+  const ex = document.getElementById('examples');
+  const bar = document.createElement('div');
+  bar.id = 'picked'; bar.hidden = true;
+  const label = document.createElement('span'); label.className = 'ptxt';
+  const more = document.createElement('button'); more.type = 'button'; more.textContent = 'Show examples';
+  more.addEventListener('click', () => { bar.hidden = true; ex.hidden = false; });
+  bar.append(label, more);
+  ex.after(bar);
+  return { show(q) { label.textContent = q; label.title = q; ex.hidden = true; bar.hidden = false; },
+           hide() { bar.hidden = true; ex.hidden = false; } };
+})();
 const examples = document.getElementById('examples');
 
 function showExamples(name) {
   examples.replaceChildren(...(EXAMPLES[name] || []).map(q => {
     const b = document.createElement('button');
     b.type = 'button'; b.textContent = q;
-    b.addEventListener('click', () => { document.getElementById('q').value = q; form.requestSubmit(); });
+    b.addEventListener('click', () => { document.getElementById('q').value = q; pickedBar.show(q); form.requestSubmit(); });
     return b;
   }));
 }
@@ -210,7 +227,7 @@ async function loadTabs() {
     b.type = 'button'; b.role = 'tab'; b.dataset.collection = name;
     b.append(text);
     const s = document.createElement('small'); s.textContent = items.toLocaleString(); b.append(s);
-    b.addEventListener('click', () => { selectTab(name); if (urlBox.style.display === 'block') form.requestSubmit(); });
+    b.addEventListener('click', () => { pickedBar.hide(); selectTab(name); if (urlBox.style.display === 'block') form.requestSubmit(); });
     tabs.append(b);
   }
   selectTab(collection);
@@ -329,6 +346,7 @@ showExamples(collection);
 loadTabs();
 if (initial.get('q')) {
   document.getElementById('q').value = initial.get('q');
+  if (Object.values(EXAMPLES).flat().includes(initial.get('q'))) pickedBar.show(initial.get('q'));
   if (initial.get('limit')) document.getElementById('limit').value = initial.get('limit');
   if (initial.get('archive') === '0') document.getElementById('archive').checked = false;
   form.requestSubmit();
