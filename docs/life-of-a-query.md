@@ -66,7 +66,7 @@ GET /feed.xml?q=<interest>[&collection=npr][&limit=40][&since=2000-01-01][&thres
 
 **6. Classify** (`rank.py`). The 40 candidates are cut into batches of 5 and sent to the ranking model (`openai/gpt-oss-20b`) in parallel (8 calls). The prompt asks it to act as a relevance **filter, not a ranker**: for each record say `strong` (directly satisfies the interest), `relevant` (substantially useful but partial) or `exclude`, with a one-sentence `why` of at most 25 words naming the specific topic. Input per record: title and the first 1500 characters. Output JSON `{"results":[{"i":0,"m":"strong","why":"..."}]}`, temperature 0, reasoning effort low. A bad index, a duplicate or an unknown category is dropped (treated as exclude). Retries: one retry of the provider call with the failed provider ignored, one retry of the batch, and the HTTP client's own retry; a provider that fails 3 times with a 30% failure share within an hour is ignored for routing.
 
-**7. Threshold, order, limit.** `strong` keeps only strong; `relevant` keeps both. The survivors are sorted by **ingestion time, newest first** (the model's verdict and the similarity do not affect order), then cut to `limit`. So a feed is a chronological stream of the matching items, not a relevance ranking, and it may hold fewer than `limit` items because only 40 candidates are considered.
+**7. Threshold, order, limit.** `strong` keeps only strong; `relevant` keeps both. The survivors are sorted by **publication time, newest first** (ingestion time for an item without one) (the model's verdict and the similarity do not affect order), then cut to `limit`. So a feed is a chronological stream of the matching items, not a relevance ranking, and it may hold fewer than `limit` items because only 40 candidates are considered.
 
 **8. Render** RSS 2.0. Channel title `rssnlweb: <q>`. Each item has the title, link, `guid` (the item id), `pubDate`, `source` (the show), a description `[strong] <why>` followed by the first 1000 characters of the text, and a `qd:` extension: `qd:category`, `qd:ingestedAt`, `qd:source`, and for transcript passages `qd:episode`, `qd:act`, `qd:offsetSeconds`, `qd:endSeconds`, `qd:transcript` and `qd:audio`.
 
@@ -121,7 +121,7 @@ From the status ledger (`neuralweb.dev/status`, 2026-10-09) and `/health`:
 1. **A ranking failure fails the request** (503); a partial feed would look like "nothing new" (`rank.py:3-5`, `app.py:263-265`).
 2. **Items are append-only**: an upstream edit never rewrites a stored item (`store.py:486-508`, `cosmos.py:108-123`).
 3. **A malformed feed never poisons the next fetch**: validators are saved only after the body parses (`ingest.py:127-139`).
-4. **A feed is a chronological stream of matching items**, ordered by ingest time, not by relevance (`feed.py:76-77`).
+4. **A feed is a chronological stream of matching items**, ordered by publication date, not by relevance (`feed.py`, `evaluate`).
 5. **`since` filters on ingest time**, so back-dated archive items and transcript passages need a far-back `since`.
 6. **Transcript passages never cross an act** (`tal.py:213-237`).
 

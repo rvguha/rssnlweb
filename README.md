@@ -94,8 +94,8 @@ send `If-None-Match` get a 304. The corpus embedding is a one-time cost per mode
 3. The ranking model classifies every candidate as `strong`, `relevant`, or
    excluded. No per-batch quota. If the model call fails the response is 503, not an
    empty feed.
-4. Survivors at or above `threshold` are ordered newest-first by ingestion time (item
-   id as tie-break) and capped at `limit`.
+4. Survivors at or above `threshold` are ordered newest-first by publication time (ingestion
+   time for an item with none; item id as tie-break) and capped at `limit`.
 
 ## Semantics to know
 
