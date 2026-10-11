@@ -70,6 +70,7 @@
   </div>
   <div id="examples" aria-label="Example topics"></div>
   <label class="check"><input id="archive" type="checkbox" checked> Include past episodes (otherwise only this week's new ones)</label>
+  <label class="check"><input id="fresh" type="checkbox" checked> Favor recent episodes (a topic's newer episodes are preferred over slightly closer old ones)</label>
 </form>
 
 <div id="feed">
@@ -133,6 +134,7 @@ for (const q of EXAMPLES) {
 function feedUrl() {
   const p = new URLSearchParams({ q: $('q').value.trim(), collection: 'tal', limit: '40' });
   if ($('archive').checked) p.set('since', ARCHIVE_SINCE);
+  if ($('fresh').checked) p.set('fresh', '365');
   return `${location.origin}/feed.xml?${p}`;
 }
 
@@ -197,7 +199,7 @@ function render(xml) {
 $('form').addEventListener('submit', async event => {
   event.preventDefault();
   const url = feedUrl();
-  history.replaceState(null, '', `?${new URLSearchParams({ q: $('q').value.trim(), ...($('archive').checked ? {} : { archive: '0' }) })}`);
+  history.replaceState(null, '', `?${new URLSearchParams({ q: $('q').value.trim(), ...($('archive').checked ? {} : { archive: '0' }), ...($('fresh').checked ? {} : { fresh: '0' }) })}`);
   $('feedurl').textContent = url;
   $('feed').style.display = 'block';
   $('copied').textContent = '';
@@ -223,6 +225,7 @@ $('copy').addEventListener('click', async () => {
 
 const initial = new URLSearchParams(location.search);
 if (initial.get('archive') === '0') $('archive').checked = false;
+if (initial.get('fresh') === '0') $('fresh').checked = false;
 if (initial.get('q')) { $('q').value = initial.get('q'); if (EXAMPLES.includes(initial.get('q'))) pickedBar.show(initial.get('q')); $('form').requestSubmit(); }
 </script>
 </body>

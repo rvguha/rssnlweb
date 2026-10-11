@@ -250,17 +250,25 @@ def create_app(services: Services) -> Starlette:
         threshold = params.get("threshold", "relevant")
         if threshold not in ("relevant", "strong"):
             return PlainTextResponse("threshold must be relevant or strong", status_code=400)
+        fresh = 0.0
+        if raw := params.get("fresh", "").strip():
+            try:
+                fresh = 365.0 if raw.lower() in ("on", "true", "yes") else float(raw)
+            except ValueError:
+                return PlainTextResponse("fresh must be a number of days (the half-life of the boost), or on", status_code=400)
+            if fresh != 0 and not 1 <= fresh <= 3650:
+                return PlainTextResponse("fresh must be 0 (off) or between 1 and 3650 days", status_code=400)
         collection = params.get("collection", "").strip() or None
         if collection and collection not in services.collections.values():
             return PlainTextResponse(f"unknown collection {collection!r}", status_code=400)
         if services.ready_at is None:
             return PlainTextResponse("index not built yet", status_code=503)
 
-        feed_request = FeedRequest(q, since, limit, threshold, collection)
+        feed_request = FeedRequest(q, since, limit, threshold, collection, fresh)
         base = str(request.base_url).rstrip("/")
         # since= makes the request time-specific, so only default-window fetches
         # are cached (those are what feed readers send).
-        key = (q, limit, threshold, collection, base) if since is None else None
+        key = (q, limit, threshold, collection, fresh, base) if since is None else None
         cached = services._feeds.get(key) if key else None
         if cached and time.monotonic() - cached[0] < services.feed_ttl:
             return _feed_response(request, cached[1], cached[2])

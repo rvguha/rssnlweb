@@ -71,6 +71,9 @@
     <label class="check" title="Search every stored episode, not only what arrived this week">
       <input id="archive" type="checkbox" checked> Include archive
     </label>
+    <label class="check" title="Prefer an item's newer matches over slightly closer old ones">
+      <input id="fresh" type="checkbox"> Favor recent
+    </label>
   </div>
   <div><button type="submit">Create feed</button></div>
 </form>
@@ -250,6 +253,7 @@ function feedUrl() {
   // Feeds hold what was ingested within the window; archived episodes are stamped
   // with their publication date, so searching them means a far-back since.
   if (document.getElementById('archive').checked) p.set('since', ARCHIVE_SINCE);
+  if (document.getElementById('fresh').checked) p.set('fresh', '365');
   return `${location.origin}/feed.xml?${p}`;
 }
 
@@ -349,6 +353,7 @@ if (initial.get('q')) {
   if (Object.values(EXAMPLES).flat().includes(initial.get('q'))) pickedBar.show(initial.get('q'));
   if (initial.get('limit')) document.getElementById('limit').value = initial.get('limit');
   if (initial.get('archive') === '0') document.getElementById('archive').checked = false;
+  if (initial.get('fresh')) document.getElementById('fresh').checked = true;
   form.requestSubmit();
 }
 </script>

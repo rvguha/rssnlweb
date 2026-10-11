@@ -55,6 +55,9 @@ async def test_feed_endpoint(tmp_path):
         assert client.get("/feed.xml").status_code == 400
         assert client.get("/feed.xml?q=rust&since=nope").status_code == 400
         assert client.get("/feed.xml?q=rust&threshold=huge").status_code == 400
+        assert client.get("/feed.xml?q=rust&fresh=soon").status_code == 400
+        assert client.get("/feed.xml?q=rust&fresh=0.5").status_code == 400
+        assert client.get("/feed.xml?q=rust&fresh=99999").status_code == 400
 
         r = client.get("/feed.xml", params={"q": "rust", "since": (NOW - timedelta(days=7)).isoformat()})
         assert r.status_code == 200

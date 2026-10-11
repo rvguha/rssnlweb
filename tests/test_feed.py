@@ -3,7 +3,7 @@ from datetime import timedelta
 
 import pytest
 
-from qdrss.feed import NS, FeedRequest, evaluate, render_rss
+from qdrss.feed import NS, FeedRequest, evaluate, freshen, render_rss
 from qdrss.index import build_index
 from qdrss.models import Candidate
 from qdrss.providers import HashEmbeddings, KeywordRanker
@@ -164,3 +164,38 @@ async def test_ranker_retries_once():
 
     matches = await classify("q", [Candidate(make_item("1", "t"), "vector", 1.0)], Flaky())
     assert len(calls) == 2 and matches[0].why == "second try"
+
+
+def _candidates(ages_days):
+    """Candidates closest first, each published that many days before NOW."""
+    return [Candidate(make_item(f"c{i}", "t", ingested=NOW - timedelta(days=a)), "vector", 1.0 - i / 100) for i, a in enumerate(ages_days)]
+
+
+def test_a_freshness_boost_lets_a_recent_item_displace_an_old_one_that_is_only_slightly_closer():
+    cands = _candidates([2000, 2000, 2000, 2000, 3])       # the recent item is last of five
+    kept = [c.item.id for c in freshen(cands, 365, 4, NOW)]
+    assert "s:c4" in kept and len(kept) == 4
+    assert kept == sorted(kept)                              # closest-first order is kept
+
+
+def test_a_freshness_boost_does_not_rescue_a_recent_item_that_is_far_down_the_pool():
+    cands = _candidates([2000] * 60 + [3])
+    kept = [c.item.id for c in freshen(cands, 365, 20, NOW)]
+    assert "s:c60" not in kept                               # closeness still counts: the boost is half the rank range at most
+
+
+def test_with_no_more_candidates_than_kept_nothing_changes():
+    cands = _candidates([10, 3000])
+    assert freshen(cands, 365, 5, NOW) == cands
+
+
+async def test_the_boost_widens_the_pool_and_the_feed_url_carries_it(store: Store):
+    asked = []
+    class Spy:
+        async def search(self, vector, since, collection, limit):
+            asked.append(limit)
+            return []
+    for fresh in (0.0, 180.0):
+        await evaluate(FeedRequest("rust", None, 10, "relevant", None, fresh), Spy(), HashEmbeddings(), KeywordRanker(), **OPTS)
+    assert asked == [OPTS["candidate_count"], OPTS["candidate_count"] * 3]
+    assert "fresh=180" in ET.fromstring(render_rss(FeedRequest("rust", None, 10, "relevant", None, 180.0), [], "http://x")).find("channel/link").text
