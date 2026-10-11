@@ -71,10 +71,16 @@ async def evaluate(
     matches = await classify(request.q, candidates, ranker, batch_size)
     if request.threshold == "strong":
         matches = [m for m in matches if m.category == "strong"]
-    # Newest first by ingestion time, id as the tie-break so equal timestamps
-    # order the same way on every fetch.
-    matches.sort(key=lambda m: (-m.item.ingested_at.timestamp(), m.item.id))
+    # Newest first by publication time, the date each item shows as its pubDate;
+    # ingestion time stands in for an item without one, and the id breaks ties so
+    # equal timestamps order the same way on every fetch. (Ordering by ingestion
+    # time put items out of date order whenever a source was ingested in batches.)
+    matches.sort(key=lambda m: (-published(m.item).timestamp(), m.item.id))
     return matches[: request.limit]
+
+
+def published(item) -> datetime:
+    return item.published_at or item.ingested_at
 
 
 def render_rss(request: FeedRequest, matches: list[Match], base_url: str) -> bytes:

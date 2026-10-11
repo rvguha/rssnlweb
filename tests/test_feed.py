@@ -59,12 +59,24 @@ async def test_default_window_when_no_since(store: Store):
     assert all(m.item.ingested_at > NOW - timedelta(days=7) for m in matches)
 
 
-async def test_newest_first_with_id_tiebreak(store: Store):
+async def test_newest_published_first_with_id_tiebreak(store: Store):
     index = await populated(store)
     req = FeedRequest("rust", since=None, limit=10, threshold="relevant")
     matches = await evaluate(req, index, HashEmbeddings(), KeywordRanker(), **OPTS)
-    keys = [(-m.item.ingested_at.timestamp(), m.item.id) for m in matches]
+    keys = [(-(m.item.published_at or m.item.ingested_at).timestamp(), m.item.id) for m in matches]
     assert keys == sorted(keys)
+
+
+async def test_order_follows_the_published_date_not_the_ingestion_batch(store: Store):
+    # A source ingested in one batch stamps every item the same moment; the feed shows each item's pubDate, so that is the order.
+    from dataclasses import replace
+    items = [replace(make_item(f"e{i}", "rust episode", "rust"), published_at=NOW - timedelta(days=d), ingested_at=NOW - timedelta(minutes=m))
+             for i, (d, m) in enumerate([(300, 1), (5, 9), (900, 3)])]
+    await store.insert_missing(items)
+    index = await build_index(store, HashEmbeddings())
+    req = FeedRequest("rust", since=None, limit=10, threshold="relevant")
+    matches = await evaluate(req, index, HashEmbeddings(), KeywordRanker(), **OPTS)
+    assert [m.item.id for m in matches] == ["s:e1", "s:e0", "s:e2"]
 
 
 async def test_no_matches_is_empty_not_error(store: Store):
