@@ -206,7 +206,9 @@ class CosmosStore:
                 continue
             seen.add(row["item_id"])
             out.append(Candidate(_item(row), "vector", float(row["score"])))
-        out.sort(key=lambda c: c.score)  # VectorDistance: smaller is closer
+        # With distanceFunction cosine, VectorDistance is a similarity: larger is closer (ORDER BY already puts the closest first; the
+        # fan-out across partitions without a collection needs this merge). Callers rely on closest first.
+        out.sort(key=lambda c: -c.score)
         return out[:limit]
 
     async def items_since(self, collection: str, since_ts: float) -> list[tuple[Item, np.ndarray]]:
