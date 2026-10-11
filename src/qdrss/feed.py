@@ -49,6 +49,7 @@ class FeedRequest:
     limit: int
     threshold: str  # "relevant" (includes strong) | "strong"
     collection: str | None = None  # manifest section; None = every source
+    fresh: float = 0.0  # freshness boost: half-life in days of the preference for recent items; 0 = none
 
 
 async def evaluate(
@@ -67,7 +68,10 @@ async def evaluate(
     # their fixture date.
     since = request.since or (now or datetime.now(UTC)) - timedelta(days=window_days)
     vector = await _query_vector(embedder, request.q)
-    candidates = await retriever.search(vector, since, request.collection, candidate_count)
+    pool = candidate_count * FRESH_POOL if request.fresh else candidate_count
+    candidates = await retriever.search(vector, since, request.collection, pool)
+    if request.fresh:
+        candidates = freshen(candidates, request.fresh, candidate_count, now or datetime.now(UTC))
     matches = await classify(request.q, candidates, ranker, batch_size)
     if request.threshold == "strong":
         matches = [m for m in matches if m.category == "strong"]
@@ -77,6 +81,28 @@ async def evaluate(
     # time put items out of date order whenever a source was ingested in batches.)
     matches.sort(key=lambda m: (-published(m.item).timestamp(), m.item.id))
     return matches[: request.limit]
+
+
+FRESH_POOL = 3          # a freshness boost chooses its candidates from this many times the usual number
+FRESH_WEIGHT = 0.5      # the most recent item gains half the pool's rank range over an old one equally close
+
+
+def freshen(candidates: list[Candidate], half_life_days: float, keep: int, now: datetime) -> list[Candidate]:
+    """The `keep` candidates with the best blend of closeness and recency. Candidates arrive closest first, so closeness is the rank
+    (1 for the closest, 0 for the last): the retrievers score on different scales, and a rank does not depend on the scale. Recency is
+    0.5 ** (age / half-life), 1 for an item published now. A boost only changes which items the ranking model sees; it still judges
+    each one, so a recent item that does not fit the question is not returned."""
+    if len(candidates) <= keep:
+        return candidates
+    n = len(candidates)
+
+    def blend(rank_and_candidate):
+        rank, c = rank_and_candidate
+        age_days = max(0.0, (now - published(c.item)).total_seconds() / 86400)
+        return (1 - rank / n) + FRESH_WEIGHT * 0.5 ** (age_days / half_life_days)
+
+    best = sorted(enumerate(candidates), key=blend, reverse=True)[:keep]
+    return [c for _, c in sorted(best, key=lambda rc: rc[0])]
 
 
 def published(item) -> datetime:
@@ -91,6 +117,8 @@ def render_rss(request: FeedRequest, matches: list[Match], base_url: str) -> byt
     params = {"q": request.q}
     if request.collection:
         params["collection"] = request.collection
+    if request.fresh:
+        params["fresh"] = f"{request.fresh:g}"
     if request.since:
         params["since"] = request.since.isoformat()
     ET.SubElement(channel, "link").text = f"{base_url}/feed.xml?{urlencode(params)}"
