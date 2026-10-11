@@ -51,6 +51,10 @@
 
   .topnav { text-align: right; font-size: 13px; margin: 0 0 14px; }
   .topnav a { color: var(--accent, #3b5ccc); }
+  #examples[hidden], #picked[hidden] { display: none; }
+  #picked { display: flex; gap: 10px; align-items: center; min-width: 0; }
+  #picked .ptxt { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--accent); background: var(--tag); border-radius: 16px; padding: 4px 12px; font-size: 13px; }
+  #picked button { flex: none; background: transparent; color: var(--accent); border: 1px solid var(--accent); border-radius: 8px; padding: 4px 10px; font-size: 13px; }
 </style>
 </head>
 <body>
@@ -105,11 +109,24 @@ const ARCHIVE_SINCE = '1990-01-01';
 const NS = 'https://qdrss.dev/ns';
 const $ = id => document.getElementById(id);
 
+// Choosing a sample folds the samples into one line above the answer; "Show examples" opens them again.
+const pickedBar = (() => {
+  const ex = document.getElementById('examples');
+  const bar = document.createElement('div');
+  bar.id = 'picked'; bar.hidden = true;
+  const label = document.createElement('span'); label.className = 'ptxt';
+  const more = document.createElement('button'); more.type = 'button'; more.textContent = 'Show examples';
+  more.addEventListener('click', () => { bar.hidden = true; ex.hidden = false; });
+  bar.append(label, more);
+  ex.after(bar);
+  return { show(q) { label.textContent = q; label.title = q; ex.hidden = true; bar.hidden = false; },
+           hide() { bar.hidden = true; ex.hidden = false; } };
+})();
 for (const q of EXAMPLES) {
   const b = document.createElement('button');
   b.type = 'button';
   b.textContent = q;
-  b.addEventListener('click', () => { $('q').value = q; $('form').requestSubmit(); });
+  b.addEventListener('click', () => { $('q').value = q; pickedBar.show(q); $('form').requestSubmit(); });
   $('examples').append(b);
 }
 
@@ -206,7 +223,7 @@ $('copy').addEventListener('click', async () => {
 
 const initial = new URLSearchParams(location.search);
 if (initial.get('archive') === '0') $('archive').checked = false;
-if (initial.get('q')) { $('q').value = initial.get('q'); $('form').requestSubmit(); }
+if (initial.get('q')) { $('q').value = initial.get('q'); if (EXAMPLES.includes(initial.get('q'))) pickedBar.show(initial.get('q')); $('form').requestSubmit(); }
 </script>
 </body>
 </html>
